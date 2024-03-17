@@ -8,6 +8,7 @@ use instructions::ora;
 use instructions::CPU_CLOCK_SPEED;
 
 use crate::cartridge::Cartridge;
+use crate::cpu::instructions::consts::RESET_VECTOR;
 use crate::cpu::instructions::lda;
 use crate::cpu::instructions::ldx;
 use crate::cpu::instructions::ldy;
@@ -24,7 +25,6 @@ pub struct CPU {
     sp: u8,
     s: u8,
 
-    reset_vector: u16,
     reset: bool,
 }
 
@@ -38,7 +38,6 @@ impl CPU {
             sp: 0,
             s: 0,
 
-            reset_vector: 0xFFFC,
             reset: true,
         }
     }
@@ -52,9 +51,9 @@ impl CPU {
         if self.reset {
             println!("Resetting CPU");
             // self.reset_vector = ((rom.header.prg_rom_size as u16 * 0x4000) % 0x8000) - 4 + 0x7FFF;
-            println!("Reset Vector {:X}", self.reset_vector);
-            let high = self.get_mapped_byte(rom.clone(), ram, self.reset_vector as usize) as u16;
-            let low = self.get_mapped_byte(rom.clone(), ram, self.reset_vector as usize + 1) as u16;
+            println!("Reset Vector {:X}", RESET_VECTOR);
+            let high = self.get_mapped_byte(rom.clone(), ram, RESET_VECTOR as usize) as u16;
+            let low = self.get_mapped_byte(rom.clone(), ram, RESET_VECTOR as usize + 1) as u16;
             self.pc = (low << 8) | high;
             self.reset = false;
             return 0;
