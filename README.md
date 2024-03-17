@@ -4,11 +4,13 @@
 
 ## Mission
 
-Create a portable, cycle accurate NES emulator in Rust that requires minimal porting to other systems. 
+Create a portable, cycle accurate NES emulator in Rust that requires minimal porting to other systems.
 
-Drawing and GUI will need to be system specific regardless of implementation. 
+Drawing and GUI will need to be system specific regardless of implementation.
 
-Multithreading is kept barebones for the purpose of easily swapping. While this technically can be switched to an async event system rather than multithreading with 4 lines of code changed, performance will take a major hit because of the thread sleep logic that each thread uses. Please be aware that single threaded systems should refactor the timing mechanism found in the CPU instructions and the `main.rs` thread spawner.
+~~Multithreading is kept barebones for the purpose of easily swapping. While this technically can be switched to an async event system rather than multithreading with 4 lines of code changed, performance will take a major hit because of the thread sleep logic that each thread uses. Please be aware that single threaded systems should refactor the timing mechanism found in the CPU instructions and the `main.rs` thread spawner.~~
+
+Multithreading has been removed as it is uncessary with the current timing method. Multithreading the simple architecture provides 0 benefits to powerful systsems and is a hinderance to low power systems with only 1-4 threads. I may revisit adding a compiler flag to enable multithreading in the future.
 
 ## TODO
 

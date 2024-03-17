@@ -12,7 +12,7 @@ pub fn ldx(
     operand2: u8,
     rom: Cartridge,
     ram: &Arc<Mutex<Vec<u8>>>,
-) {
+) -> u64 {
     let mut cycles: u64 = 2;
 
     match instruction {
@@ -58,5 +58,5 @@ pub fn ldx(
     }
 
     // Sleep for num of cycles
-    std::thread::sleep(Duration::from_nanos(cycles * CPU_CLOCK_SPEED));
+    return cycles;
 }

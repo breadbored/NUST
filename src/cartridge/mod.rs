@@ -36,6 +36,8 @@ pub fn get_rom() -> Cartridge {
             let prg_rom_end = prg_rom_start + (cart_header.prg_rom_size as usize * 0x4000);
             let prg_rom = file[prg_rom_start..prg_rom_end].to_vec();
 
+            println!("DEBUG {:X?}", &prg_rom[prg_rom.len() - 16..]);
+
             let chr_rom_start = prg_rom_end;
             let chr_rom_end = chr_rom_start + (cart_header.chr_rom_size as usize * 0x2000);
             let chr_rom = file[chr_rom_start..chr_rom_end].to_vec();
@@ -45,29 +47,6 @@ pub fn get_rom() -> Cartridge {
                 prg_rom: prg_rom,
                 chr_rom: chr_rom,
             };
-
-            // // Print the values of the cartridge
-            // println!("INES: {}", cart.header.ines);
-            // println!("NES2: {}", cart.header.nes2);
-            // println!("PRG ROM Size: {}", cart.header.prg_rom_size);
-            // println!("CHR ROM Size: {}", cart.header.chr_rom_size);
-            // println!("Flags: {}", cart.header.flags);
-            // println!("Mapper: {}", cart.header.mapper);
-            // println!("Submapper: {}", cart.header.submapper);
-            // println!("PRG MSB ROM Size: {}", cart.header.prg_msb_rom_size);
-            // println!("CHR MSB ROM Size: {}", cart.header.chr_msb_rom_size);
-            // println!("PRG RAM Size: {}", cart.header.prg_ram_size);
-            // println!("CHR RAM Size: {}", cart.header.chr_ram_size);
-            // println!("CPU/PPU Timing: {}", cart.header.cpu_ppu_timing);
-            // println!("VS Unisystem: {}", cart.header.is_vs_unisystem);
-            // println!("VS Unisystem: {}", cart.header.vs_unisystem);
-            // println!("Extended Console: {}", cart.header.is_extended_console);
-            // println!("Extended Console: {}", cart.header.extended_console);
-            // println!("Misc ROMs: {}", cart.header.misc_roms);
-            // println!(
-            //     "Default Expansion Device: {}",
-            //     cart.header.default_expansion_device
-            // );
 
             return cart;
         }
@@ -108,6 +87,7 @@ pub struct Cartridge {
 
 impl Cartridge {
     pub fn get_prg_from_address(&self, address: u16) -> u8 {
+        println!("Address: {:X}", address);
         if address < 0x8000 {
             return 0;
         }

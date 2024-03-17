@@ -2,7 +2,7 @@ use crate::cpu::CPU;
 use crate::cpu::CPU_CLOCK_SPEED;
 use std::time::Duration;
 
-pub fn nop(cpu: &mut CPU, instruction: u8) {
+pub fn nop(cpu: &mut CPU, instruction: u8) -> u64 {
     // println!("NOP");
     cpu.pc += 1;
 
@@ -29,5 +29,5 @@ pub fn nop(cpu: &mut CPU, instruction: u8) {
     }
 
     // Sleep for num of cycles
-    std::thread::sleep(Duration::from_nanos(cycles * CPU_CLOCK_SPEED));
+    return cycles;
 }

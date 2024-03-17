@@ -3,7 +3,13 @@ use crate::cpu::{CPU, CPU_CLOCK_SPEED};
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
-pub fn ora(cpu: &mut CPU, instruction: u8, operand: u8, rom: Cartridge, ram: &Arc<Mutex<Vec<u8>>>) {
+pub fn ora(
+    cpu: &mut CPU,
+    instruction: u8,
+    operand: u8,
+    rom: Cartridge,
+    ram: &Arc<Mutex<Vec<u8>>>,
+) -> u64 {
     let mut cycles: u64 = 2;
 
     match instruction {
@@ -58,5 +64,5 @@ pub fn ora(cpu: &mut CPU, instruction: u8, operand: u8, rom: Cartridge, ram: &Ar
         _ => {}
     }
 
-    std::thread::sleep(Duration::from_nanos(cycles * CPU_CLOCK_SPEED));
+    return cycles;
 }

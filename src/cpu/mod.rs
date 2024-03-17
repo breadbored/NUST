@@ -15,6 +15,7 @@ use crate::cpu::instructions::sta;
 use crate::cpu::instructions::stx;
 use crate::cpu::instructions::sty;
 
+#[derive(Clone, Copy)]
 pub struct CPU {
     a: u8,
     x: u8,
@@ -22,6 +23,9 @@ pub struct CPU {
     pc: u16,
     sp: u8,
     s: u8,
+
+    reset_vector: u16,
+    reset: bool,
 }
 
 impl CPU {
@@ -33,70 +37,92 @@ impl CPU {
             pc: 0,
             sp: 0,
             s: 0,
+
+            reset_vector: 0xFFFC,
+            reset: true,
         }
     }
 
-    pub fn tick(&mut self, rom: Cartridge, ram: &Arc<Mutex<Vec<u8>>>, vram: &Arc<Mutex<Vec<u8>>>) {
-        // println!("Tick");
-        let instruction = rom.get_prg_from_address(self.pc);
-        let operand = rom.get_prg_from_address(self.pc + 1);
-        let operand2 = rom.get_prg_from_address(self.pc + 2);
+    pub fn tick(
+        &mut self,
+        rom: Cartridge,
+        ram: &Arc<Mutex<Vec<u8>>>,
+        vram: &Arc<Mutex<Vec<u8>>>,
+    ) -> u64 {
+        if self.reset {
+            self.reset_vector = ((rom.header.prg_rom_size as u16 * 0x4000) % 0x8000) - 4 + 0x7FFF;
+            let low = self.get_mapped_byte(rom.clone(), ram, self.reset_vector as usize) as u16;
+            let high =
+                self.get_mapped_byte(rom.clone(), ram, self.reset_vector as usize + 1) as u16;
+            self.pc = (high << 8) | low;
+            self.reset = false;
+            println!("Resetting CPU to {:X}", self.pc);
+            return 0;
+        }
+
+        // println!("PC: {}", self.pc);
+        let instruction = self.get_mapped_byte(rom.clone(), ram, self.pc as usize);
+        let operand = self.get_mapped_byte(rom.clone(), ram, self.pc as usize + 1);
+        let operand2 = self.get_mapped_byte(rom.clone(), ram, self.pc as usize + 2);
 
         match instruction {
             0x01 | 0x11 | 0x05 | 0x15 | 0x09 | 0x19 | 0x0D | 0x1D => {
                 // ORA
                 println!("ORA");
-                ora(self, instruction, operand, rom.clone(), ram);
+                return ora(self, instruction, operand, rom.clone(), ram);
             }
             0xA1 | 0xB1 | 0xA5 | 0xB5 | 0xA9 | 0xB9 | 0xAD | 0xBD => {
                 // LDA
                 println!("LDA");
-                lda(self, instruction, operand, operand2, rom.clone(), ram);
+                return lda(self, instruction, operand, operand2, rom.clone(), ram);
             }
             0xA2 | 0xA6 | 0xB6 | 0xAE | 0xBE => {
                 // LDX
                 println!("LDX");
-                ldx(self, instruction, operand, operand2, rom.clone(), ram);
+                return ldx(self, instruction, operand, operand2, rom.clone(), ram);
             }
             0xA0 | 0xA4 | 0xB4 | 0xAC | 0xBC => {
                 // LDY
                 println!("LDY");
-                ldy(self, instruction, operand, operand2, rom.clone(), ram);
+                return ldy(self, instruction, operand, operand2, rom.clone(), ram);
             }
             0x85 | 0x95 | 0x8D | 0x9D | 0x99 | 0x81 | 0x91 => {
                 // STA
                 println!("STA");
-                sta(self, instruction, operand, operand2, rom.clone(), ram);
+                return sta(self, instruction, operand, operand2, rom.clone(), ram);
             }
             0x86 | 0x96 | 0x8E => {
                 // STX
                 println!("STX");
-                stx(self, instruction, operand, operand2, rom.clone(), ram);
+                return stx(self, instruction, operand, operand2, rom.clone(), ram);
             }
             0x84 | 0x94 | 0x8C => {
                 // STX
                 println!("STX");
-                sty(self, instruction, operand, operand2, rom.clone(), ram);
+                return sty(self, instruction, operand, operand2, rom.clone(), ram);
             }
             0x1A | 0x3A | 0x5A | 0x7A | 0xDA | 0xFA | 0x80 | 0x82 | 0x89 | 0xC2 | 0xE2 | 0x04
             | 0x44 | 0x64 | 0x14 | 0x34 | 0x54 | 0x74 | 0xD4 | 0xF4 | 0x0C | 0x1C | 0x3C | 0x5C
             | 0x7C | 0xDC | 0xFC => {
                 // NOP
                 println!("NOP");
-                nop(self, instruction);
+                return nop(self, instruction);
             }
             0x4C | 0x6C => {
                 // JMP
                 println!("JMP 0x{:X?}{:X?}", operand, operand2);
-                jmp(self, instruction, operand, operand2, rom.clone(), ram);
+                return jmp(self, instruction, operand, operand2, rom.clone(), ram);
             }
-            _ => nop(self, instruction),
+            _ => {
+                println!("Unknown instruction: 0x{:X?}", instruction);
+                return nop(self, instruction);
+            }
         }
     }
 
     pub fn get_mapped_byte(&self, rom: Cartridge, ram: &Arc<Mutex<Vec<u8>>>, address: usize) -> u8 {
         if address <= 0x1FFF {
-            let mut ram = ram.lock().unwrap();
+            let ram = ram.lock().unwrap();
             return ram[address & 0x7FF];
         }
 
@@ -145,8 +171,11 @@ impl CPU {
         }
 
         if address <= 0xFFFF {
-            return rom.get_prg_from_address((address - 0x8000) as u16);
+            println!("PRG ROM");
+            return rom.get_prg_from_address(address as u16);
         }
+
+        println!("NOTHING");
 
         return 0;
     }
