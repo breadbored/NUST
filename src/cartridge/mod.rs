@@ -36,7 +36,7 @@ pub fn get_rom() -> Cartridge {
             let prg_rom_end = prg_rom_start + (cart_header.prg_rom_size as usize * 0x4000);
             let prg_rom = file[prg_rom_start..prg_rom_end].to_vec();
 
-            println!("DEBUG {:X?}", &prg_rom[prg_rom.len() - 16..]);
+            // println!("DEBUG {:X?}", &prg_rom[prg_rom.len() - 16..]);
 
             let chr_rom_start = prg_rom_end;
             let chr_rom_end = chr_rom_start + (cart_header.chr_rom_size as usize * 0x2000);
@@ -87,12 +87,12 @@ pub struct Cartridge {
 
 impl Cartridge {
     pub fn get_prg_from_address(&self, address: u16) -> u8 {
-        println!("Address: {:X}", address);
+        // println!("Address: {:X}", address);
         if address < 0x8000 {
             return 0;
         }
 
-        let prg_rom_address = address - 0x8000;
+        let prg_rom_address = (address - 0x8000) % (self.header.prg_rom_size as u16 * 0x4000);
         return self.prg_rom[prg_rom_address as usize];
     }
 

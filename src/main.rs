@@ -44,13 +44,13 @@ fn main() {
             match event {
                 Event::Quit { .. } => break 'running,
                 Event::KeyDown { .. } => {
-                    println!("Key down");
+                    // println!("Key down");
                 }
                 _ => {}
             }
         }
 
-        println!("Running");
+        // println!("Running");
 
         (last_cpu_cycle, last_ppu_cycle, last_apu_cycle) = run_processor(
             last_cpu_cycle,
@@ -102,7 +102,7 @@ fn run_processor(
     ram: Arc<Mutex<Vec<u8>>>,
     vram: Arc<Mutex<Vec<u8>>>,
 ) -> (u128, u128, u128) {
-    println!("Running processor");
+    // println!("Running processor");
     const CPU_CYCLES: u128 = 559; // 1.79 MHz
     const PPU_CYCLES: u128 = 186; // 5.37 MHz
     const APU_CYCLES: u128 = 559; // 1.79 MHz
@@ -110,7 +110,7 @@ fn run_processor(
     // CPU runs at 1.79 MHz
     let check_cpu_time = get_time();
     if check_cpu_time - last_cpu_cycle.borrow() >= CPU_CYCLES {
-        println!("Running CPU");
+        // println!("Running CPU");
         let cycles_ran = cpu.tick(rom.clone(), &ram, &vram);
         last_cpu_cycle = get_time() + cycles_ran as u128;
     }

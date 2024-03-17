@@ -51,12 +51,11 @@ impl CPU {
     ) -> u64 {
         if self.reset {
             self.reset_vector = ((rom.header.prg_rom_size as u16 * 0x4000) % 0x8000) - 4 + 0x7FFF;
-            let low = self.get_mapped_byte(rom.clone(), ram, self.reset_vector as usize) as u16;
-            let high =
-                self.get_mapped_byte(rom.clone(), ram, self.reset_vector as usize + 1) as u16;
+            let high = self.get_mapped_byte(rom.clone(), ram, self.reset_vector as usize) as u16;
+            let low = self.get_mapped_byte(rom.clone(), ram, self.reset_vector as usize + 1) as u16;
             self.pc = (high << 8) | low;
             self.reset = false;
-            println!("Resetting CPU to {:X}", self.pc);
+            // println!("Resetting CPU to {:X}", self.pc);
             return 0;
         }
 
@@ -121,6 +120,8 @@ impl CPU {
     }
 
     pub fn get_mapped_byte(&self, rom: Cartridge, ram: &Arc<Mutex<Vec<u8>>>, address: usize) -> u8 {
+        // println!("---------------------------");
+        // println!("Getting byte at 0x{:X?}", address);
         if address <= 0x1FFF {
             let ram = ram.lock().unwrap();
             return ram[address & 0x7FF];
@@ -175,7 +176,7 @@ impl CPU {
             return rom.get_prg_from_address(address as u16);
         }
 
-        println!("NOTHING");
+        println!("WHAT THE FUCK?");
 
         return 0;
     }
@@ -194,75 +195,75 @@ impl CPU {
         }
 
         if address <= 0x3FFF {
-            println!("TODO: PPU REGISTERS");
+            // println!("TODO: PPU REGISTERS");
             if address == 0x2000 {
-                println!("TODO: PPU CTRL");
+                // println!("TODO: PPU CTRL");
                 return;
             }
             if address == 0x2001 {
-                println!("TODO: PPU MASK");
+                // println!("TODO: PPU MASK");
                 return;
             }
             if address == 0x2003 {
-                println!("TODO: PPU OAM ADDR");
+                // println!("TODO: PPU OAM ADDR");
                 return;
             }
             if address == 0x2004 {
-                println!("TODO: PPU OAM DATA");
+                // println!("TODO: PPU OAM DATA");
                 return;
             }
             if address == 0x2005 {
-                println!("TODO: PPU SCROLL");
+                // println!("TODO: PPU SCROLL");
                 return;
             }
             if address == 0x2006 {
-                println!("TODO: PPU ADDR");
+                // println!("TODO: PPU ADDR");
                 return;
             }
             if address == 0x2007 {
-                println!("TODO: PPU DATA");
+                // println!("TODO: PPU DATA");
                 return;
             }
             if address == 0x2008 {
-                println!("TODO: PPU OAM DMA");
+                // println!("TODO: PPU OAM DMA");
                 return;
             }
             return;
         }
 
         if address <= 0x401F {
-            println!("TODO: HARDWARE REGISTERS");
+            // println!("TODO: HARDWARE REGISTERS");
             if address == 0x4014 {
-                println!("TODO: OAM DMA");
+                // println!("TODO: OAM DMA");
                 return;
             }
             if address == 0x4015 {
-                println!("TODO: APU STATUS");
+                // println!("TODO: APU STATUS");
                 return;
             }
             if address == 0x4016 {
-                println!("TODO: JOYPAD 1");
+                // println!("TODO: JOYPAD 1");
                 return;
             }
             if address == 0x4017 {
-                println!("TODO: JOYPAD 2");
+                // println!("TODO: JOYPAD 2");
                 return;
             }
             return;
         }
 
         if address <= 0x5FFF {
-            println!("TODO: EXPANSION ROM");
+            // println!("TODO: EXPANSION ROM");
             return;
         }
 
         if address <= 0x7FFF {
-            println!("TODO: SRAM");
+            // println!("TODO: SRAM");
             return;
         }
 
         if address <= 0xFFFF {
-            println!("TODO: PRG ROM");
+            // println!("TODO: PRG ROM");
             return;
         }
     }
