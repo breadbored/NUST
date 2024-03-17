@@ -50,12 +50,13 @@ impl CPU {
         vram: &Arc<Mutex<Vec<u8>>>,
     ) -> u64 {
         if self.reset {
-            self.reset_vector = ((rom.header.prg_rom_size as u16 * 0x4000) % 0x8000) - 4 + 0x7FFF;
+            println!("Resetting CPU");
+            // self.reset_vector = ((rom.header.prg_rom_size as u16 * 0x4000) % 0x8000) - 4 + 0x7FFF;
+            println!("Reset Vector {:X}", self.reset_vector);
             let high = self.get_mapped_byte(rom.clone(), ram, self.reset_vector as usize) as u16;
             let low = self.get_mapped_byte(rom.clone(), ram, self.reset_vector as usize + 1) as u16;
-            self.pc = (high << 8) | low;
+            self.pc = (low << 8) | high;
             self.reset = false;
-            // println!("Resetting CPU to {:X}", self.pc);
             return 0;
         }
 
@@ -96,8 +97,8 @@ impl CPU {
                 return stx(self, instruction, operand, operand2, rom.clone(), ram);
             }
             0x84 | 0x94 | 0x8C => {
-                // STX
-                println!("STX");
+                // STY
+                println!("STY");
                 return sty(self, instruction, operand, operand2, rom.clone(), ram);
             }
             0x1A | 0x3A | 0x5A | 0x7A | 0xDA | 0xFA | 0x80 | 0x82 | 0x89 | 0xC2 | 0xE2 | 0x04
@@ -123,6 +124,7 @@ impl CPU {
         // println!("---------------------------");
         // println!("Getting byte at 0x{:X?}", address);
         if address <= 0x1FFF {
+            println!("Getting byte from RAM");
             let ram = ram.lock().unwrap();
             return ram[address & 0x7FF];
         }
@@ -166,8 +168,8 @@ impl CPU {
             return 0;
         }
 
-        if address <= 0x7FFF {
-            println!("TODO: SRAM");
+        if address <= 0xBFFF {
+            println!("TODO: LT ROM");
             return 0;
         }
 

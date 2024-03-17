@@ -1,9 +1,7 @@
 use crate::cartridge::Cartridge;
 use crate::cpu::CPU;
-use crate::cpu::CPU_CLOCK_SPEED;
 use std::sync::Arc;
 use std::sync::Mutex;
-use std::time::Duration;
 
 pub fn stx(
     cpu: &mut CPU,
@@ -33,7 +31,7 @@ pub fn stx(
             cpu.set_mapped_byte(
                 rom,
                 &ram.clone(),
-                (operand2 as usize) | ((operand as usize) << 8),
+                (operand as usize) | ((operand2 as usize) << 8),
                 cpu.x,
             );
             cpu.pc += 3;

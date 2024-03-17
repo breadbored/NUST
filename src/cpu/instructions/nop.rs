@@ -1,6 +1,4 @@
 use crate::cpu::CPU;
-use crate::cpu::CPU_CLOCK_SPEED;
-use std::time::Duration;
 
 pub fn nop(cpu: &mut CPU, instruction: u8) -> u64 {
     // println!("NOP");

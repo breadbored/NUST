@@ -1,2 +1,5 @@
 /target
 test.nes
+nestest.nes
+nestest.*
+.DS_Store

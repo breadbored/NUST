@@ -1,7 +1,6 @@
 use crate::cartridge::Cartridge;
-use crate::cpu::{CPU, CPU_CLOCK_SPEED};
+use crate::cpu::CPU;
 use std::sync::{Arc, Mutex};
-use std::time::Duration;
 
 pub fn ora(
     cpu: &mut CPU,

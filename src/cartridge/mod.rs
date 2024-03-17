@@ -1,7 +1,7 @@
 use std::fs;
 
 pub fn get_rom() -> Cartridge {
-    let contents = fs::read("test.nes");
+    let contents = fs::read("nestest.nes");
 
     match contents {
         Ok(file) => {

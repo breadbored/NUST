@@ -1,9 +1,7 @@
 use crate::cartridge::Cartridge;
 use crate::cpu::CPU;
-use crate::cpu::CPU_CLOCK_SPEED;
 use std::sync::Arc;
 use std::sync::Mutex;
-use std::time::Duration;
 
 pub fn sta(
     cpu: &mut CPU,
@@ -33,7 +31,7 @@ pub fn sta(
             cpu.set_mapped_byte(
                 rom,
                 &ram.clone(),
-                (operand2 as usize) | ((operand as usize) << 8),
+                (operand as usize) | ((operand2 as usize) << 8),
                 cpu.a,
             );
             cpu.pc += 3;
@@ -44,7 +42,7 @@ pub fn sta(
             cpu.set_mapped_byte(
                 rom,
                 &ram.clone(),
-                (operand2 as usize) | ((operand as usize) << 8) + cpu.x as usize,
+                (operand as usize) | ((operand2 as usize) << 8) + cpu.x as usize,
                 cpu.a,
             );
             cpu.pc += 3;
@@ -55,7 +53,7 @@ pub fn sta(
             cpu.set_mapped_byte(
                 rom,
                 &ram.clone(),
-                (operand2 as usize) | ((operand as usize) << 8) + cpu.y as usize,
+                (operand as usize) | ((operand2 as usize) << 8) + cpu.y as usize,
                 cpu.a,
             );
             cpu.pc += 3;
@@ -66,7 +64,7 @@ pub fn sta(
             cpu.set_mapped_byte(
                 rom,
                 &ram.clone(),
-                (operand2 as usize) | ((operand as usize) << 8) + cpu.x as usize,
+                (operand as usize) | ((operand2 as usize) << 8) + cpu.x as usize,
                 cpu.a,
             );
             cpu.pc += 2;
@@ -77,7 +75,7 @@ pub fn sta(
             cpu.set_mapped_byte(
                 rom,
                 &ram.clone(),
-                (operand2 as usize) | ((operand as usize) << 8) + cpu.y as usize,
+                (operand as usize) | ((operand2 as usize) << 8) + cpu.y as usize,
                 cpu.a,
             );
             cpu.pc += 2;

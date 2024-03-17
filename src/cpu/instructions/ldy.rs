@@ -1,8 +1,6 @@
 use crate::cartridge::Cartridge;
 use crate::cpu::CPU;
-use crate::cpu::CPU_CLOCK_SPEED;
 use std::sync::{Arc, Mutex};
-use std::time::Duration;
 
 pub fn ldy(
     cpu: &mut CPU,
@@ -38,7 +36,7 @@ pub fn ldy(
             cpu.y = cpu.get_mapped_byte(
                 rom,
                 &ram.clone(),
-                (operand2 as usize) | ((operand as usize) << 8),
+                (operand as usize) | ((operand2 as usize) << 8),
             );
             cpu.pc += 3;
             cycles = 4;
@@ -48,7 +46,7 @@ pub fn ldy(
             cpu.y = cpu.get_mapped_byte(
                 rom,
                 &ram.clone(),
-                (operand2 as usize) | ((operand as usize) << 8) + cpu.x as usize,
+                (operand as usize) | ((operand2 as usize) << 8) + cpu.x as usize,
             );
             cpu.pc += 3;
             cycles = 4;
