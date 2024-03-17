@@ -5,10 +5,11 @@ use std::sync::{Arc, Mutex};
 use instructions::jmp;
 use instructions::nop;
 use instructions::ora;
-use instructions::CPU_CLOCK_SPEED;
+use instructions::{CPU_CLOCK_SPEED, IRQ_VECTOR, NMI_VECTOR, RESET_VECTOR};
 
 use crate::cartridge::Cartridge;
-use crate::cpu::instructions::consts::RESET_VECTOR;
+use crate::cpu::instructions::bne;
+use crate::cpu::instructions::jsr;
 use crate::cpu::instructions::lda;
 use crate::cpu::instructions::ldx;
 use crate::cpu::instructions::ldy;
@@ -35,7 +36,7 @@ impl CPU {
             x: 0,
             y: 0,
             pc: 0,
-            sp: 0,
+            sp: 0xFF,
             s: 0,
 
             reset: true,
@@ -112,6 +113,16 @@ impl CPU {
                 println!("JMP 0x{:X?}{:X?}", operand, operand2);
                 return jmp(self, instruction, operand, operand2, rom.clone(), ram);
             }
+            0xD0 => {
+                // BNE
+                println!("BNE");
+                return bne(self, instruction, operand, rom.clone(), ram);
+            }
+            0x20 => {
+                // JSR
+                println!("JSR");
+                return jsr(self, instruction, operand, operand2, rom.clone(), ram);
+            }
             _ => {
                 println!("Unknown instruction: 0x{:X?}", instruction);
                 return nop(self, instruction);
@@ -123,57 +134,57 @@ impl CPU {
         // println!("---------------------------");
         // println!("Getting byte at 0x{:X?}", address);
         if address <= 0x1FFF {
-            println!("Getting byte from RAM");
+            // println!("Getting byte from RAM");
             let ram = ram.lock().unwrap();
             return ram[address & 0x7FF];
         }
 
         if address <= 0x3FFF {
-            println!("TODO: PPU REGISTERS");
+            // println!("TODO: PPU REGISTERS");
             if address == 0x2002 {
-                println!("TODO: PPU STATUS");
+                // println!("TODO: PPU STATUS");
                 return 0;
             }
             if address == 0x2007 {
-                println!("TODO: PPU DATA");
+                // println!("TODO: PPU DATA");
                 return 0;
             }
             return 0;
         }
 
         if address <= 0x401F {
-            println!("TODO: HARDWARE REGISTERS");
+            // println!("TODO: HARDWARE REGISTERS");
             if address == 0x4016 {
-                println!("TODO: JOYPAD 1");
+                // println!("TODO: JOYPAD 1");
                 return 0;
             }
             if address == 0x4017 {
-                println!("TODO: JOYPAD 2");
+                // println!("TODO: JOYPAD 2");
                 return 0;
             }
             if address == 0x4014 {
-                println!("TODO: OAM DMA");
+                // println!("TODO: OAM DMA");
                 return 0;
             }
             if address == 0x4015 {
-                println!("TODO: APU STATUS");
+                // println!("TODO: APU STATUS");
                 return 0;
             }
             return 0;
         }
 
         if address <= 0x5FFF {
-            println!("TODO: EXPANSION ROM");
+            // println!("TODO: EXPANSION ROM");
             return 0;
         }
 
         if address <= 0xBFFF {
-            println!("TODO: LT ROM");
+            // println!("TODO: LT ROM");
             return 0;
         }
 
         if address <= 0xFFFF {
-            println!("PRG ROM");
+            // println!("PRG ROM");
             return rom.get_prg_from_address(address as u16);
         }
 
@@ -291,5 +302,17 @@ impl CPU {
         let high = (value & 0xFF00) as u8;
         self.set_mapped_byte(rom.clone(), ram, address, low);
         self.set_mapped_byte(rom.clone(), ram, address + 1, high);
+    }
+
+    pub fn push_stack(&mut self, ram: &Arc<Mutex<Vec<u8>>>, value: u8) {
+        let mut ram = ram.lock().unwrap();
+        ram[0x100 | self.sp as usize] = value;
+        self.sp -= 1;
+    }
+
+    pub fn pop_stack(&mut self, ram: &Arc<Mutex<Vec<u8>>>) -> u8 {
+        let ram = ram.lock().unwrap();
+        self.sp += 1;
+        return ram[0x100 | self.sp as usize];
     }
 }

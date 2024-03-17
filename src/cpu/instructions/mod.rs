@@ -1,5 +1,7 @@
+pub mod bne;
 pub mod consts;
 pub mod jmp;
+pub mod jsr;
 pub mod lda;
 pub mod ldx;
 pub mod ldy;
@@ -9,8 +11,10 @@ pub mod sta;
 pub mod stx;
 pub mod sty;
 
-pub use consts::CPU_CLOCK_SPEED;
+pub use bne::bne;
+pub use consts::{CPU_CLOCK_SPEED, IRQ_VECTOR, NMI_VECTOR, RESET_VECTOR};
 pub use jmp::jmp;
+pub use jsr::jsr;
 pub use lda::lda;
 pub use ldx::ldx;
 pub use ldy::ldy;
