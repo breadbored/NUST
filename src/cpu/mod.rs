@@ -9,7 +9,7 @@ use instructions::{CPU_CLOCK_SPEED, IRQ_VECTOR, NMI_VECTOR, RESET_VECTOR};
 
 use crate::cartridge::Cartridge;
 use crate::cpu::instructions::adc;
-use crate::cpu::instructions::add::and;
+use crate::cpu::instructions::and;
 use crate::cpu::instructions::bne;
 use crate::cpu::instructions::jsr;
 use crate::cpu::instructions::lda;

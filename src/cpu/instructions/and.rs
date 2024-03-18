@@ -64,23 +64,25 @@ pub fn and(
         }
         0x21 => {
             // Indirect, X
-            let addr = cpu.get_mapped_byte(rom, &ram.clone(), operand as usize + cpu.x as usize);
+            let addr =
+                cpu.get_mapped_byte(rom.clone(), &ram.clone(), operand as usize + cpu.x as usize);
             let addr2 = cpu.get_mapped_byte(
-                rom,
+                rom.clone(),
                 &ram.clone(),
                 (operand as usize + cpu.x as usize + 1) % 256,
             );
             let addr = (addr as usize) | ((addr2 as usize) << 8);
-            cpu.a &= cpu.get_mapped_byte(rom, &ram.clone(), addr);
+            cpu.a &= cpu.get_mapped_byte(rom.clone(), &ram.clone(), addr);
             cpu.pc += 2;
             cycles = 6;
         }
         0x31 => {
             // Indirect, Y
-            let addr = cpu.get_mapped_byte(rom, &ram.clone(), operand as usize);
-            let addr2 = cpu.get_mapped_byte(rom, &ram.clone(), (operand as usize + 1) % 256);
+            let addr = cpu.get_mapped_byte(rom.clone(), &ram.clone(), operand as usize);
+            let addr2 =
+                cpu.get_mapped_byte(rom.clone(), &ram.clone(), (operand as usize + 1) % 256);
             let addr = (addr as usize) | ((addr2 as usize) << 8);
-            cpu.a &= cpu.get_mapped_byte(rom, &ram.clone(), addr + cpu.y as usize);
+            cpu.a &= cpu.get_mapped_byte(rom.clone(), &ram.clone(), addr + cpu.y as usize);
             cpu.pc += 2;
             cycles = 5;
         }
