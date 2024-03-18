@@ -36,9 +36,11 @@ fn main() {
     let mut last_ppu_cycle: u128 = get_time();
     let mut last_apu_cycle: u128 = get_time();
 
-    let mut last_keyboard_poll: u128 = get_time();
-
     // System Event Loop
+    let mut tx = 0;
+    let mut ty = 0;
+    let mut bx = 256;
+    let mut by = 240;
     'running: loop {
         for event in event_pump.poll_iter() {
             match event {
@@ -62,13 +64,19 @@ fn main() {
             vram.clone(),
         );
 
+        // Move tx (top X), ty (top Y), bx (bottom X), and by (bottom Y) around the screen in a circle
+        tx = (tx + 1) % 256;
+        ty = (ty + 1) % 240;
+        bx = (bx + 1) % 256;
+        by = (by + 1) % 240;
+
         canvas.set_draw_color(Color::RGB(0, 0, 0));
         canvas.clear();
         canvas.set_draw_color(Color::RGB(255, 255, 255));
         canvas
             .draw_line(
-                Point::new(0, 0),
-                Point::new(256 * (SCALE as i32) - 1, 240 * (SCALE as i32) - 1),
+                Point::new(tx, ty),
+                Point::new(bx * (SCALE as i32) - 1, by * (SCALE as i32) - 1),
             )
             .unwrap();
 

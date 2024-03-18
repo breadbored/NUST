@@ -12,7 +12,9 @@ use crate::cpu::instructions::adc;
 use crate::cpu::instructions::and;
 use crate::cpu::instructions::asl;
 use crate::cpu::instructions::bne;
+use crate::cpu::instructions::dec;
 use crate::cpu::instructions::dex;
+use crate::cpu::instructions::dey;
 use crate::cpu::instructions::jsr;
 use crate::cpu::instructions::lda;
 use crate::cpu::instructions::ldx;
@@ -175,6 +177,16 @@ impl CPU {
                 // DEX
                 println!("DEX");
                 return dex(self, instruction, rom.clone(), ram);
+            }
+            0x88 => {
+                // DEY
+                println!("DEY");
+                return dey(self, instruction, rom.clone(), ram);
+            }
+            0xC6 | 0xD6 | 0xCE | 0xDE => {
+                // DEC
+                println!("DEC");
+                return dec(self, instruction, operand, operand2, rom.clone(), ram);
             }
             _ => {
                 println!("Unknown instruction: 0x{:X?}", instruction);

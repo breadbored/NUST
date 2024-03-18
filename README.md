@@ -39,17 +39,62 @@ Multithreading has been removed as it is uncessary with the current timing metho
     - [x] Stack Pointer
     - [x] Status
   - [ ] Implement all [6502 assembly instructions](https://www.masswerk.at/6502/6502_instruction_set.html) and their variants, including illegal opcodes (in progress, 61 / 255)
+    - [x] ADC
+    - [x] AND
+    - [x] ASL
+    - [ ] BCC
+    - [ ] BCS
+    - [ ] BEQ
+    - [ ] BIT
+    - [ ] BMI
+    - [x] BNE
+    - [ ] BPL
+    - [ ] BRK
+    - [ ] BVC
+    - [ ] BVS
+    - [ ] CLC
+    - [ ] CLD
+    - [ ] CLI
+    - [ ] CLV
+    - [ ] CMP
+    - [ ] CPX
+    - [ ] CPY
+    - [ ] DEC
+    - [x] DEX
+    - [x] DEY
+    - [ ] EOR
+    - [ ] INC
+    - [ ] INX
+    - [ ] INY
+    - [x] JMP
+    - [x] JSR
+    - [x] LDA
+    - [x] LDX
+    - [x] LDY
+    - [ ] LSR
+    - [x] NOP
+    - [x] ORA
+    - [ ] PHA
+    - [ ] PHP
+    - [ ] PLA
+    - [ ] PLP
+    - [ ] ROL
+    - [ ] ROR
+    - [ ] RTI
+    - [ ] RTS
+    - [ ] SBC
+    - [ ] SEC
+    - [ ] SED
+    - [ ] SEI
+    - [x] STA
     - [x] STX
     - [x] STY
-    - [x] STA
-    - [x] LDA
-    - [x] LDY
-    - [x] LDX
-    - [x] ORA
-    - [ ] AND
-    - [ ] CMP
-    - [ ] CPY
-    - [ ] CPX
+    - [ ] TAX
+    - [ ] TAY
+    - [ ] TSX
+    - [ ] TXA
+    - [ ] TXS
+    - [ ] TYA
     - [ ] ... more than I want to type
   - [ ] Implement vram reading/writing and blocking while vram is in use by PPU
 - [ ] PPU
