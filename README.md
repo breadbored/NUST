@@ -43,8 +43,8 @@ Multithreading has been removed as it is uncessary with the current timing metho
     - [x] AND
     - [x] ASL
     - [x] BCC
-    - [ ] BCS
-    - [ ] BEQ
+    - [x] BCS
+    - [x] BEQ
     - [ ] BIT
     - [ ] BMI
     - [x] BNE
