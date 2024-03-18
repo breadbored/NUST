@@ -38,64 +38,63 @@ Multithreading has been removed as it is uncessary with the current timing metho
     - [x] Program Counter
     - [x] Stack Pointer
     - [x] Status
-  - [ ] Implement all [6502 assembly instructions](https://www.masswerk.at/6502/6502_instruction_set.html) and their variants, including illegal opcodes (in progress, 61 / 255)
-    - [x] ADC
-    - [x] AND
-    - [x] ASL
-    - [x] BCC
-    - [x] BCS
-    - [x] BEQ
-    - [ ] BIT
-    - [ ] BMI
-    - [x] BNE
-    - [ ] BPL
-    - [ ] BRK
-    - [ ] BVC
-    - [ ] BVS
-    - [ ] CLC
-    - [ ] CLD
-    - [ ] CLI
-    - [ ] CLV
-    - [ ] CMP
-    - [ ] CPX
-    - [ ] CPY
-    - [x] DEC
-    - [x] DEX
-    - [x] DEY
-    - [ ] EOR
-    - [ ] INC
-    - [ ] INX
-    - [ ] INY
-    - [x] JMP
-    - [x] JSR
-    - [x] LDA
-    - [x] LDX
-    - [x] LDY
-    - [ ] LSR
-    - [x] NOP
-    - [x] ORA
-    - [ ] PHA
-    - [ ] PHP
-    - [ ] PLA
-    - [ ] PLP
-    - [ ] ROL
-    - [ ] ROR
-    - [ ] RTI
-    - [ ] RTS
-    - [ ] SBC
-    - [ ] SEC
-    - [ ] SED
-    - [ ] SEI
-    - [x] STA
-    - [x] STX
-    - [x] STY
-    - [ ] TAX
-    - [ ] TAY
-    - [ ] TSX
-    - [ ] TXA
-    - [ ] TXS
-    - [ ] TYA
-    - [ ] ... more than I want to type
+  - [ ] Implement all [6502 assembly instructions](https://www.masswerk.at/6502/6502_instruction_set.html) and their variants, including illegal opcodes (in progress)
+    - [x] ADC (Add with Carry) [Immediate, Zero Page, Zero Page X, Absolute, Absolute X, Absolute Y, Indirect X, Indirect Y]
+    - [x] AND (Logical AND) [Immediate, Zero Page, Zero Page X, Absolute, Absolute X, Absolute Y, Indirect X, Indirect Y]
+    - [x] ASL (Arithmetic Shift Left) [Accumulator, Zero Page, Zero Page X, Absolute, Absolute X]
+    - [x] BCC (Branch if Carry Clear) [Relative]
+    - [x] BCS (Branch if Carry Set) [Relative]
+    - [x] BEQ (Branch if Equal) [Relative]
+    - [ ] BIT (Bit Test) [Zero Page, Absolute]
+    - [ ] BMI (Branch if Minus) [Relative]
+    - [x] BNE (Branch if Not Equal) [Relative]
+    - [ ] BPL (Branch if Positive) [Relative]
+    - [ ] BRK (Force Interrupt) [Implied]
+    - [ ] BVC (Branch if Overflow Clear) [Relative]
+    - [ ] BVS (Branch if Overflow Set) [Relative]
+    - [ ] CLC (Clear Carry Flag) [Implied]
+    - [ ] CLD (Clear Decimal Mode) [Implied]
+    - [ ] CLI (Clear Interrupt Disable) [Implied]
+    - [ ] CLV (Clear Overflow Flag) [Implied]
+    - [ ] CMP (Compare) [Immediate, Zero Page, Zero Page X, Absolute, Absolute X, Absolute Y, Indirect X, Indirect Y]
+    - [ ] CPX (Compare X Register) [Immediate, Zero Page, Zero Page X, Absolute]
+    - [ ] CPY (Compare Y Register) [Immediate, Zero Page, Zero Page X, Absolute]
+    - [x] DEC (Decrement Memory) [Zero Page, Zero Page X, Absolute, Absolute X]
+    - [x] DEX (Decrement X Register) [Implied]
+    - [x] DEY (Decrement Y Register) [Implied]
+    - [ ] EOR (Exclusive OR) [Immediate, Zero Page, Zero Page X, Absolute, Absolute X, Absolute Y, Indirect X, Indirect Y]
+    - [ ] INC (Increment Memory) [Zero Page, Zero Page X, Absolute, Absolute X]
+    - [ ] INX (Increment X Register) [Implied]
+    - [ ] INY (Increment Y Register) [Implied]
+    - [x] JMP (Jump) [Absolute, Indirect]
+    - [x] JSR (Jump to Subroutine) [Absolute]
+    - [x] LDA (Load Accumulator) [Immediate, Zero Page, Zero Page X, Absolute, Absolute X, Absolute Y, Indirect X, Indirect Y]
+    - [x] LDX (Load X Register) [Immediate, Zero Page, Zero Page Y, Absolute, Absolute Y]
+    - [x] LDY (Load Y Register) [Immediate, Zero Page, Zero Page X, Absolute, Absolute X]
+    - [ ] LSR (Logical Shift Right) [Accumulator, Zero Page, Zero Page X, Absolute, Absolute X]
+    - [x] NOP (No Operation) [Implied]
+    - [x] ORA (Logical Inclusive OR) [Immediate, Zero Page, Zero Page X, Absolute, Absolute X, Absolute Y, Indirect X, Indirect Y]
+    - [ ] PHA (Push Accumulator) [Implied]
+    - [ ] PHP (Push Processor Status) [Implied]
+    - [ ] PLA (Pull Accumulator) [Implied]
+    - [ ] PLP (Pull Processor Status) [Implied]
+    - [ ] ROL (Rotate Left) [Accumulator, Zero Page, Zero Page X, Absolute, Absolute X]
+    - [ ] ROR (Rotate Right) [Accumulator, Zero Page, Zero Page X, Absolute, Absolute X]
+    - [ ] RTI (Return from Interrupt) [Implied]
+    - [ ] RTS (Return from Subroutine) [Implied]
+    - [ ] SBC (Subtract with Carry) [Immediate, Zero Page, Zero Page X, Absolute, Absolute X, Absolute Y, Indirect X, Indirect Y]
+    - [ ] SEC (Set Carry Flag) [Implied]
+    - [ ] SED (Set Decimal Flag) [Implied]
+    - [ ] SEI (Set Interrupt Disable) [Implied]
+    - [x] STA (Store Accumulator) [Zero Page, Zero Page X, Absolute, Absolute X, Absolute Y, Indirect X, Indirect Y]
+    - [x] STX (Store X Register) [Zero Page, Zero Page Y, Absolute]
+    - [x] STY (Store Y Register) [Zero Page, Zero Page X, Absolute]
+    - [ ] TAX (Transfer Accumulator to X) [Implied]
+    - [ ] TAY (Transfer Accumulator to Y) [Implied]
+    - [ ] TSX (Transfer Stack Pointer to X) [Implied]
+    - [ ] TXA (Transfer X to Accumulator) [Implied]
+    - [ ] TXS (Transfer X to Stack Pointer) [Implied]
+    - [ ] TYA (Transfer Y to Accumulator) [Implied]
   - [ ] Implement vram reading/writing and blocking while vram is in use by PPU
 - [ ] PPU
   - [ ] Implement registers
