@@ -2,6 +2,8 @@
 
 [WIP] A cycle accurate NES emulator in Rust, with minimal dependencies
 
+[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/breadcodes)
+
 ## Mission
 
 Create a portable, cycle accurate NES emulator in Rust that requires minimal porting to other systems.
