@@ -59,7 +59,7 @@ Multithreading has been removed as it is uncessary with the current timing metho
     - [ ] CMP
     - [ ] CPX
     - [ ] CPY
-    - [ ] DEC
+    - [x] DEC
     - [x] DEX
     - [x] DEY
     - [ ] EOR
