@@ -15,7 +15,7 @@ pub fn bne(
     match instruction {
         0xD0 => {
             // Relative
-            if cpu.s & 0b00000010 == 0 {
+            if !cpu.status.zero {
                 let offset = operand as i8;
                 cpu.pc += 2;
                 let new_addr = cpu.pc.wrapping_add(offset as u16);

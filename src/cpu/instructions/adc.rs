@@ -17,10 +17,10 @@ pub fn adc(
         0x69 => {
             // Immediate
             let value = operand;
-            let result = cpu.a as u16 + value as u16 + (cpu.s & 0b00000001) as u16;
-            cpu.s = (cpu.s & 0b11111110) | ((result > 0xFF) as u8);
-            cpu.s = (cpu.s & 0b10111111) | (((cpu.a ^ value) & 0x80 != 0) as u8) << 6;
-            cpu.s = (cpu.s & 0b01111111) | ((result & 0xFF == 0) as u8) << 7;
+            let result = cpu.a as u16 + value as u16 + (cpu.status.carry as u8) as u16;
+            cpu.status.carry = result > 0xFF;
+            cpu.status.overflow = ((cpu.a ^ value) & 0x80) != 0;
+            cpu.status.zero = result & 0xFF == 0;
             cpu.a = result as u8;
             cpu.pc += 2;
             cycles = 2;
@@ -28,10 +28,10 @@ pub fn adc(
         0x65 => {
             // Zero Page
             let value = cpu.get_mapped_byte(rom, &ram.clone(), operand as usize);
-            let result = cpu.a as u16 + value as u16 + (cpu.s & 0b00000001) as u16;
-            cpu.s = (cpu.s & 0b11111110) | ((result > 0xFF) as u8);
-            cpu.s = (cpu.s & 0b10111111) | (((cpu.a ^ value) & 0x80 != 0) as u8) << 6;
-            cpu.s = (cpu.s & 0b01111111) | ((result & 0xFF == 0) as u8) << 7;
+            let result = cpu.a as u16 + value as u16 + (cpu.status.carry as u8) as u16;
+            cpu.status.carry = result > 0xFF;
+            cpu.status.overflow = ((cpu.a ^ value) & 0x80) != 0;
+            cpu.status.zero = result & 0xFF == 0;
             cpu.a = result as u8;
             cpu.pc += 2;
             cycles = 3;
@@ -39,10 +39,10 @@ pub fn adc(
         0x75 => {
             // Zero Page, X
             let value = cpu.get_mapped_byte(rom, &ram.clone(), operand as usize + cpu.x as usize);
-            let result = cpu.a as u16 + value as u16 + (cpu.s & 0b00000001) as u16;
-            cpu.s = (cpu.s & 0b11111110) | ((result > 0xFF) as u8);
-            cpu.s = (cpu.s & 0b10111111) | (((cpu.a ^ value) & 0x80 != 0) as u8) << 6;
-            cpu.s = (cpu.s & 0b01111111) | ((result & 0xFF == 0) as u8) << 7;
+            let result = cpu.a as u16 + value as u16 + (cpu.status.carry as u8) as u16;
+            cpu.status.carry = result > 0xFF;
+            cpu.status.overflow = ((cpu.a ^ value) & 0x80) != 0;
+            cpu.status.zero = result & 0xFF == 0;
             cpu.a = result as u8;
             cpu.pc += 2;
             cycles = 4;
@@ -54,10 +54,10 @@ pub fn adc(
                 &ram.clone(),
                 (operand as usize) | ((operand2 as usize) << 8),
             );
-            let result = cpu.a as u16 + value as u16 + (cpu.s & 0b00000001) as u16;
-            cpu.s = (cpu.s & 0b11111110) | ((result > 0xFF) as u8);
-            cpu.s = (cpu.s & 0b10111111) | (((cpu.a ^ value) & 0x80 != 0) as u8) << 6;
-            cpu.s = (cpu.s & 0b01111111) | ((result & 0xFF == 0) as u8) << 7;
+            let result = cpu.a as u16 + value as u16 + (cpu.status.carry as u8) as u16;
+            cpu.status.carry = result > 0xFF;
+            cpu.status.overflow = ((cpu.a ^ value) & 0x80) != 0;
+            cpu.status.zero = result & 0xFF == 0;
             cpu.a = result as u8;
             cpu.pc += 3;
             cycles = 4;
@@ -69,10 +69,10 @@ pub fn adc(
                 &ram.clone(),
                 (operand as usize) | ((operand2 as usize) << 8) + cpu.x as usize,
             );
-            let result = cpu.a as u16 + value as u16 + (cpu.s & 0b00000001) as u16;
-            cpu.s = (cpu.s & 0b11111110) | ((result > 0xFF) as u8);
-            cpu.s = (cpu.s & 0b10111111) | (((cpu.a ^ value) & 0x80 != 0) as u8) << 6;
-            cpu.s = (cpu.s & 0b01111111) | ((result & 0xFF == 0) as u8) << 7;
+            let result = cpu.a as u16 + value as u16 + (cpu.status.carry as u8) as u16;
+            cpu.status.carry = result > 0xFF;
+            cpu.status.overflow = ((cpu.a ^ value) & 0x80) != 0;
+            cpu.status.zero = result & 0xFF == 0;
             cpu.a = result as u8;
             cpu.pc += 3;
             cycles = 4;
@@ -84,10 +84,10 @@ pub fn adc(
                 &ram.clone(),
                 (operand as usize) | ((operand2 as usize) << 8) + cpu.y as usize,
             );
-            let result = cpu.a as u16 + value as u16 + (cpu.s & 0b00000001) as u16;
-            cpu.s = (cpu.s & 0b11111110) | ((result > 0xFF) as u8);
-            cpu.s = (cpu.s & 0b10111111) | (((cpu.a ^ value) & 0x80 != 0) as u8) << 6;
-            cpu.s = (cpu.s & 0b01111111) | ((result & 0xFF == 0) as u8) << 7;
+            let result = cpu.a as u16 + value as u16 + (cpu.status.carry as u8) as u16;
+            cpu.status.carry = result > 0xFF;
+            cpu.status.overflow = ((cpu.a ^ value) & 0x80) != 0;
+            cpu.status.zero = result & 0xFF == 0;
             cpu.a = result as u8;
             cpu.pc += 3;
             cycles = 4;
@@ -106,10 +106,10 @@ pub fn adc(
                     ) as usize)
                         << 8,
             );
-            let result = cpu.a as u16 + value as u16 + (cpu.s & 0b00000001) as u16;
-            cpu.s = (cpu.s & 0b11111110) | ((result > 0xFF) as u8);
-            cpu.s = (cpu.s & 0b10111111) | (((cpu.a ^ value) & 0x80 != 0) as u8) << 6;
-            cpu.s = (cpu.s & 0b01111111) | ((result & 0xFF == 0) as u8) << 7;
+            let result = cpu.a as u16 + value as u16 + (cpu.status.carry as u8) as u16;
+            cpu.status.carry = result > 0xFF;
+            cpu.status.overflow = ((cpu.a ^ value) & 0x80) != 0;
+            cpu.status.zero = result & 0xFF == 0;
             cpu.a = result as u8;
             cpu.pc += 2;
             cycles = 6;
@@ -125,10 +125,10 @@ pub fn adc(
                         << 8)
                     + cpu.y as usize,
             );
-            let result = cpu.a as u16 + value as u16 + (cpu.s & 0b00000001) as u16;
-            cpu.s = (cpu.s & 0b11111110) | ((result > 0xFF) as u8);
-            cpu.s = (cpu.s & 0b10111111) | (((cpu.a ^ value) & 0x80 != 0) as u8) << 6;
-            cpu.s = (cpu.s & 0b01111111) | ((result & 0xFF == 0) as u8) << 7;
+            let result = cpu.a as u16 + value as u16 + (cpu.status.carry as u8) as u16;
+            cpu.status.carry = result > 0xFF;
+            cpu.status.overflow = ((cpu.a ^ value) & 0x80) != 0;
+            cpu.status.zero = result & 0xFF == 0;
             cpu.a = result as u8;
             cpu.pc += 2;
             cycles = 5;

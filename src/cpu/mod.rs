@@ -10,7 +10,9 @@ use instructions::{CPU_CLOCK_SPEED, IRQ_VECTOR, NMI_VECTOR, RESET_VECTOR};
 use crate::cartridge::Cartridge;
 use crate::cpu::instructions::adc;
 use crate::cpu::instructions::and;
+use crate::cpu::instructions::asl;
 use crate::cpu::instructions::bne;
+use crate::cpu::instructions::dex;
 use crate::cpu::instructions::jsr;
 use crate::cpu::instructions::lda;
 use crate::cpu::instructions::ldx;
@@ -21,6 +23,7 @@ use crate::cpu::instructions::sty;
 
 #[derive(Clone, Copy)]
 pub struct CPU {
+    // Registers
     a: u8,
     x: u8,
     y: u8,
@@ -28,7 +31,21 @@ pub struct CPU {
     sp: u8,
     s: u8,
 
+    // CPU state
+    status: Status,
     reset: bool,
+}
+
+#[derive(Clone, Copy)]
+pub struct Status {
+    negative: bool,
+    overflow: bool,
+    reserved: bool,
+    break_mode: bool,
+    decimal_mode: bool,
+    interrupt_disable: bool,
+    zero: bool,
+    carry: bool,
 }
 
 impl CPU {
@@ -41,6 +58,16 @@ impl CPU {
             sp: 0xFF,
             s: 0,
 
+            status: Status {
+                negative: false,
+                overflow: false,
+                reserved: true,
+                break_mode: true,
+                decimal_mode: false,
+                interrupt_disable: true,
+                zero: false,
+                carry: false,
+            },
             reset: true,
         }
     }
@@ -66,6 +93,10 @@ impl CPU {
         let instruction = self.get_mapped_byte(rom.clone(), ram, self.pc as usize);
         let operand = self.get_mapped_byte(rom.clone(), ram, self.pc as usize + 1);
         let operand2 = self.get_mapped_byte(rom.clone(), ram, self.pc as usize + 2);
+
+        // Since we're managing status flags in a struct and limited cases require reading flags directly,
+        // we call this before every instruction to sync the status register with the flags.
+        self.set_flags();
 
         match instruction {
             0x01 | 0x11 | 0x05 | 0x15 | 0x09 | 0x19 | 0x0D | 0x1D => {
@@ -134,6 +165,16 @@ impl CPU {
                 // AND
                 println!("AND");
                 return and(self, instruction, operand, operand2, rom.clone(), ram);
+            }
+            0x0A | 0x06 | 0x16 | 0x0E | 0x1E => {
+                // ASL
+                println!("ASL");
+                return asl(self, instruction, operand, operand2, rom.clone(), ram);
+            }
+            0xCA => {
+                // DEX
+                println!("DEX");
+                return dex(self, instruction, rom.clone(), ram);
             }
             _ => {
                 println!("Unknown instruction: 0x{:X?}", instruction);
@@ -326,5 +367,15 @@ impl CPU {
         let ram = ram.lock().unwrap();
         self.sp += 1;
         return ram[0x100 | self.sp as usize];
+    }
+
+    pub fn set_flags(&mut self) {
+        self.s = self.status.carry as u8
+            | (self.status.zero as u8) << 1
+            | (self.status.interrupt_disable as u8) << 2
+            | (self.status.decimal_mode as u8) << 3
+            | (self.status.break_mode as u8) << 4
+            | (self.status.overflow as u8) << 6
+            | (self.status.negative as u8) << 7;
     }
 }

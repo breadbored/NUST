@@ -1,7 +1,9 @@
 pub mod adc;
 pub mod and;
+pub mod asl;
 pub mod bne;
 pub mod consts;
+pub mod dex;
 pub mod jmp;
 pub mod jsr;
 pub mod lda;
@@ -15,8 +17,10 @@ pub mod sty;
 
 pub use adc::adc;
 pub use and::and;
+pub use asl::asl;
 pub use bne::bne;
 pub use consts::{CPU_CLOCK_SPEED, IRQ_VECTOR, NMI_VECTOR, RESET_VECTOR};
+pub use dex::dex;
 pub use jmp::jmp;
 pub use jsr::jsr;
 pub use lda::lda;
