@@ -1,3 +1,4 @@
+pub mod adc;
 pub mod bne;
 pub mod consts;
 pub mod jmp;
@@ -11,6 +12,7 @@ pub mod sta;
 pub mod stx;
 pub mod sty;
 
+pub use adc::adc;
 pub use bne::bne;
 pub use consts::{CPU_CLOCK_SPEED, IRQ_VECTOR, NMI_VECTOR, RESET_VECTOR};
 pub use jmp::jmp;

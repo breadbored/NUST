@@ -8,6 +8,7 @@ use instructions::ora;
 use instructions::{CPU_CLOCK_SPEED, IRQ_VECTOR, NMI_VECTOR, RESET_VECTOR};
 
 use crate::cartridge::Cartridge;
+use crate::cpu::instructions::adc;
 use crate::cpu::instructions::bne;
 use crate::cpu::instructions::jsr;
 use crate::cpu::instructions::lda;
@@ -122,6 +123,11 @@ impl CPU {
                 // JSR
                 println!("JSR");
                 return jsr(self, instruction, operand, operand2, rom.clone(), ram);
+            }
+            0x69 | 0x65 | 0x75 | 0x6D | 0x7D | 0x79 | 0x61 | 0x71 => {
+                // ADC
+                println!("ADC");
+                return adc(self, instruction, operand, operand2, rom.clone(), ram);
             }
             _ => {
                 println!("Unknown instruction: 0x{:X?}", instruction);
