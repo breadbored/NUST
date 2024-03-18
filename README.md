@@ -42,7 +42,7 @@ Multithreading has been removed as it is uncessary with the current timing metho
     - [x] ADC
     - [x] AND
     - [x] ASL
-    - [ ] BCC
+    - [x] BCC
     - [ ] BCS
     - [ ] BEQ
     - [ ] BIT

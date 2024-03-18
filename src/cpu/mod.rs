@@ -2,26 +2,27 @@ mod instructions;
 
 use std::sync::{Arc, Mutex};
 
+use crate::cartridge::Cartridge;
+use instructions::adc;
+use instructions::and;
+use instructions::asl;
+use instructions::bcc;
+use instructions::bcs;
+use instructions::bne;
+use instructions::dec;
+use instructions::dex;
+use instructions::dey;
 use instructions::jmp;
+use instructions::jsr;
+use instructions::lda;
+use instructions::ldx;
+use instructions::ldy;
 use instructions::nop;
 use instructions::ora;
+use instructions::sta;
+use instructions::stx;
+use instructions::sty;
 use instructions::{CPU_CLOCK_SPEED, IRQ_VECTOR, NMI_VECTOR, RESET_VECTOR};
-
-use crate::cartridge::Cartridge;
-use crate::cpu::instructions::adc;
-use crate::cpu::instructions::and;
-use crate::cpu::instructions::asl;
-use crate::cpu::instructions::bne;
-use crate::cpu::instructions::dec;
-use crate::cpu::instructions::dex;
-use crate::cpu::instructions::dey;
-use crate::cpu::instructions::jsr;
-use crate::cpu::instructions::lda;
-use crate::cpu::instructions::ldx;
-use crate::cpu::instructions::ldy;
-use crate::cpu::instructions::sta;
-use crate::cpu::instructions::stx;
-use crate::cpu::instructions::sty;
 
 #[derive(Clone, Copy)]
 pub struct CPU {
@@ -187,6 +188,16 @@ impl CPU {
                 // DEC
                 println!("DEC");
                 return dec(self, instruction, operand, operand2, rom.clone(), ram);
+            }
+            0x90 => {
+                // BCC
+                println!("BCC");
+                return bcc(self, instruction, operand, rom.clone(), ram);
+            }
+            0xB0 => {
+                // BCS
+                println!("BCS");
+                return bcs(self, instruction, operand, rom.clone(), ram);
             }
             _ => {
                 println!("Unknown instruction: 0x{:X?}", instruction);
@@ -387,6 +398,7 @@ impl CPU {
             | (self.status.interrupt_disable as u8) << 2
             | (self.status.decimal_mode as u8) << 3
             | (self.status.break_mode as u8) << 4
+            | (self.status.reserved as u8) << 5
             | (self.status.overflow as u8) << 6
             | (self.status.negative as u8) << 7;
     }
