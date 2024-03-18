@@ -3,6 +3,7 @@ mod instructions;
 use std::sync::{Arc, Mutex};
 
 use crate::cartridge::Cartridge;
+use crate::cpu::instructions::beq;
 use instructions::adc;
 use instructions::and;
 use instructions::asl;
@@ -198,6 +199,11 @@ impl CPU {
                 // BCS
                 println!("BCS");
                 return bcs(self, instruction, operand, rom.clone(), ram);
+            }
+            0xF0 => {
+                // BEQ
+                println!("BEQ");
+                return beq(self, instruction, operand, rom.clone(), ram);
             }
             _ => {
                 println!("Unknown instruction: 0x{:X?}", instruction);
