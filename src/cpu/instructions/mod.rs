@@ -1,5 +1,5 @@
 pub mod adc;
-pub mod add;
+pub mod and;
 pub mod bne;
 pub mod consts;
 pub mod jmp;
