@@ -9,6 +9,7 @@ use instructions::{CPU_CLOCK_SPEED, IRQ_VECTOR, NMI_VECTOR, RESET_VECTOR};
 
 use crate::cartridge::Cartridge;
 use crate::cpu::instructions::adc;
+use crate::cpu::instructions::add::and;
 use crate::cpu::instructions::bne;
 use crate::cpu::instructions::jsr;
 use crate::cpu::instructions::lda;
@@ -128,6 +129,11 @@ impl CPU {
                 // ADC
                 println!("ADC");
                 return adc(self, instruction, operand, operand2, rom.clone(), ram);
+            }
+            0x29 | 0x25 | 0x35 | 0x2D | 0x3D | 0x39 | 0x21 | 0x31 => {
+                // AND
+                println!("AND");
+                return and(self, instruction, operand, operand2, rom.clone(), ram);
             }
             _ => {
                 println!("Unknown instruction: 0x{:X?}", instruction);
