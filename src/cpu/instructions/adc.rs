@@ -95,11 +95,15 @@ pub fn adc(
         0x61 => {
             // (Indirect, X)
             let value = cpu.get_mapped_byte(
-                rom,
+                rom.clone(),
                 &ram.clone(),
-                cpu.get_mapped_byte(rom, &ram.clone(), operand as usize + cpu.x as usize) as usize
-                    | (cpu.get_mapped_byte(rom, &ram.clone(), operand as usize + cpu.x as usize + 1)
-                        as usize)
+                cpu.get_mapped_byte(rom.clone(), &ram.clone(), operand as usize + cpu.x as usize)
+                    as usize
+                    | (cpu.get_mapped_byte(
+                        rom.clone(),
+                        &ram.clone(),
+                        operand as usize + cpu.x as usize + 1,
+                    ) as usize)
                         << 8,
             );
             let result = cpu.a as u16 + value as u16 + (cpu.s & 0b00000001) as u16;
@@ -113,10 +117,12 @@ pub fn adc(
         0x71 => {
             // (Indirect), Y
             let value = cpu.get_mapped_byte(
-                rom,
+                rom.clone(),
                 &ram.clone(),
-                (cpu.get_mapped_byte(rom, &ram.clone(), operand as usize) as usize
-                    | (cpu.get_mapped_byte(rom, &ram.clone(), operand as usize + 1) as usize) << 8)
+                (cpu.get_mapped_byte(rom.clone(), &ram.clone(), operand as usize) as usize
+                    | (cpu.get_mapped_byte(rom.clone(), &ram.clone(), operand as usize + 1)
+                        as usize)
+                        << 8)
                     + cpu.y as usize,
             );
             let result = cpu.a as u16 + value as u16 + (cpu.s & 0b00000001) as u16;
