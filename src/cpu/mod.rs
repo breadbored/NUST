@@ -3,26 +3,10 @@ mod instructions;
 use std::sync::{Arc, Mutex};
 
 use crate::cartridge::Cartridge;
-use crate::cpu::instructions::beq;
-use instructions::adc;
-use instructions::and;
-use instructions::asl;
-use instructions::bcc;
-use instructions::bcs;
-use instructions::bne;
-use instructions::dec;
-use instructions::dex;
-use instructions::dey;
-use instructions::jmp;
-use instructions::jsr;
-use instructions::lda;
-use instructions::ldx;
-use instructions::ldy;
-use instructions::nop;
-use instructions::ora;
-use instructions::sta;
-use instructions::stx;
-use instructions::sty;
+use instructions::{
+    adc, and, asl, bcc, bcs, beq, bit, bmi, bne, bpl, brk, bvc, bvs, dec, dex, dey, jmp, jsr, lda,
+    ldx, ldy, nop, ora, sta, stx, sty,
+};
 use instructions::{CPU_CLOCK_SPEED, IRQ_VECTOR, NMI_VECTOR, RESET_VECTOR};
 
 #[derive(Clone, Copy)]
@@ -38,6 +22,7 @@ pub struct CPU {
     // CPU state
     status: Status,
     reset: bool,
+    jammed: bool,
 }
 
 #[derive(Clone, Copy)]
@@ -73,6 +58,7 @@ impl CPU {
                 carry: false,
             },
             reset: true,
+            jammed: false,
         }
     }
 
@@ -204,6 +190,36 @@ impl CPU {
                 // BEQ
                 println!("BEQ");
                 return beq(self, instruction, operand, rom.clone(), ram);
+            }
+            0x24 | 0x2C => {
+                // BIT
+                println!("BIT");
+                return bit(self, instruction, operand, operand2, rom.clone(), ram);
+            }
+            0x30 => {
+                // BMI
+                println!("BMI");
+                return bmi(self, instruction, operand, rom.clone(), ram);
+            }
+            0x10 => {
+                // BPL
+                println!("BPL {:}", operand as i8);
+                return bpl(self, instruction, operand, rom.clone(), ram);
+            }
+            0x00 => {
+                // BRK
+                println!("BRK");
+                return brk(self, instruction, rom.clone(), ram);
+            }
+            0x50 => {
+                // BVC
+                println!("BVC");
+                return bvc(self, instruction, operand, rom.clone(), ram);
+            }
+            0x70 => {
+                // BVS
+                println!("BVS");
+                return bvs(self, instruction, operand, rom.clone(), ram);
             }
             _ => {
                 println!("Unknown instruction: 0x{:X?}", instruction);
@@ -407,5 +423,9 @@ impl CPU {
             | (self.status.reserved as u8) << 5
             | (self.status.overflow as u8) << 6
             | (self.status.negative as u8) << 7;
+    }
+
+    pub fn is_jammed(&self) -> bool {
+        return self.jammed;
     }
 }

@@ -3,7 +3,7 @@ use crate::cpu::CPU;
 use std::sync::Arc;
 use std::sync::Mutex;
 
-pub fn bne(
+pub fn bvc(
     cpu: &mut CPU,
     instruction: u8,
     operand: u8,
@@ -13,9 +13,9 @@ pub fn bne(
     let mut cycles: u64 = 2;
 
     match instruction {
-        0xD0 => {
+        0x50 => {
             // Relative
-            if !cpu.status.zero {
+            if !cpu.status.overflow {
                 let offset = operand as i8;
                 let new_addr = cpu.pc.wrapping_add(2).wrapping_add(offset as u16);
                 cycles = if (cpu.pc & 0xFF00) != (new_addr & 0xFF00) {

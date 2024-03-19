@@ -120,7 +120,13 @@ fn run_processor(
     if check_cpu_time - last_cpu_cycle.borrow() >= CPU_CYCLES {
         // println!("Running CPU");
         let cycles_ran = cpu.tick(rom.clone(), &ram, &vram);
-        last_cpu_cycle = get_time() + cycles_ran as u128;
+        last_cpu_cycle = get_time()
+            + (CPU_CYCLES * cycles_ran as u128)
+            + (if cpu.is_jammed() {
+                0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+            } else {
+                0
+            });
     }
 
     // PPU runs at 5.37 MHz

@@ -17,17 +17,15 @@ pub fn beq(
             // Relative
             if cpu.status.zero {
                 let offset = operand as i8;
-                cpu.pc += 2;
-                let new_addr = cpu.pc.wrapping_add(offset as u16);
-                // If the branch is taken, page boundary crossing should be checked to adjust `cycles`
+                let new_addr = cpu.pc.wrapping_add(2).wrapping_add(offset as u16);
                 cycles = if (cpu.pc & 0xFF00) != (new_addr & 0xFF00) {
                     4
                 } else {
                     3
                 };
-                cpu.pc = new_addr; // Branch is taken, update the PC
+                cpu.pc = new_addr;
             } else {
-                cpu.pc += 2; // Branch not taken, move to the next instruction
+                cpu.pc += 2;
                 cycles = 2;
             }
         }
