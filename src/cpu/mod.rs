@@ -3,11 +3,11 @@ mod instructions;
 use std::sync::{Arc, Mutex};
 
 use crate::cartridge::Cartridge;
+use instructions::RESET_VECTOR;
 use instructions::{
-    adc, and, asl, bcc, bcs, beq, bit, bmi, bne, bpl, brk, bvc, bvs, dec, dex, dey, jmp, jsr, lda,
-    ldx, ldy, nop, ora, sta, stx, sty,
+    adc, and, asl, bcc, bcs, beq, bit, bmi, bne, bpl, brk, bvc, bvs, clc, cld, cli, clv, dec, dex,
+    dey, jmp, jsr, lda, ldx, ldy, nop, ora, sta, stx, sty,
 };
-use instructions::{CPU_CLOCK_SPEED, IRQ_VECTOR, NMI_VECTOR, RESET_VECTOR};
 
 #[derive(Clone, Copy)]
 pub struct CPU {
@@ -220,6 +220,26 @@ impl CPU {
                 // BVS
                 println!("BVS");
                 return bvs(self, instruction, operand, rom.clone(), ram);
+            }
+            0x18 => {
+                // CLC
+                println!("CLC");
+                return clc(self, instruction, rom.clone(), ram);
+            }
+            0xD8 => {
+                // CLD
+                println!("CLD");
+                return cld(self, instruction, rom.clone(), ram);
+            }
+            0x58 => {
+                // CLI
+                println!("CLI");
+                return cli(self, instruction, rom.clone(), ram);
+            }
+            0xB8 => {
+                // CLV
+                println!("CLV");
+                return clv(self, instruction, rom.clone(), ram);
             }
             _ => {
                 println!("Unknown instruction: 0x{:X?}", instruction);
