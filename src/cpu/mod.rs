@@ -5,8 +5,8 @@ use std::sync::{Arc, Mutex};
 use crate::cartridge::Cartridge;
 use instructions::RESET_VECTOR;
 use instructions::{
-    adc, and, asl, bcc, bcs, beq, bit, bmi, bne, bpl, brk, bvc, bvs, clc, cld, cli, clv, dec, dex,
-    dey, jmp, jsr, lda, ldx, ldy, nop, ora, sta, stx, sty,
+    adc, and, asl, bcc, bcs, beq, bit, bmi, bne, bpl, brk, bvc, bvs, clc, cld, cli, clv, cmp, cpx,
+    cpy, dec, dex, dey, jmp, jsr, lda, ldx, ldy, nop, ora, sta, stx, sty,
 };
 
 #[derive(Clone, Copy)]
@@ -75,6 +75,7 @@ impl CPU {
             let high = self.get_mapped_byte(rom.clone(), ram, RESET_VECTOR as usize) as u16;
             let low = self.get_mapped_byte(rom.clone(), ram, RESET_VECTOR as usize + 1) as u16;
             self.pc = (low << 8) | high;
+            println!("PC: {:X}", self.pc);
             self.reset = false;
             return 0;
         }
@@ -240,6 +241,21 @@ impl CPU {
                 // CLV
                 println!("CLV");
                 return clv(self, instruction, rom.clone(), ram);
+            }
+            0xC9 | 0xC5 | 0xD5 | 0xCD | 0xDD | 0xD9 | 0xC1 | 0xD1 => {
+                // CMP
+                println!("CMP");
+                return cmp(self, instruction, operand, operand2, rom.clone(), ram);
+            }
+            0xE0 | 0xE4 | 0xEC => {
+                // CPX
+                println!("CPX");
+                return cpx(self, instruction, operand, operand2, rom.clone(), ram);
+            }
+            0xC0 | 0xC4 | 0xCC => {
+                // CPY
+                println!("CPY");
+                return cpy(self, instruction, operand, operand2, rom.clone(), ram);
             }
             _ => {
                 println!("Unknown instruction: 0x{:X?}", instruction);
@@ -447,5 +463,23 @@ impl CPU {
 
     pub fn is_jammed(&self) -> bool {
         return self.jammed;
+    }
+
+    pub fn get_indirect_address(
+        &self,
+        rom: Cartridge,
+        ram: &Arc<Mutex<Vec<u8>>>,
+        operand: u8,
+        xy_val: u8,
+    ) -> u16 {
+        let low = self.get_mapped_byte(rom.clone(), ram, operand as usize) as u16;
+        let high = self.get_mapped_byte(rom.clone(), ram, (operand + 1) as usize) as u16;
+        let address = (high << 8) | low;
+        let indirect_address = if xy_val == 0 {
+            address + self.x as u16
+        } else {
+            address + self.y as u16
+        };
+        return indirect_address;
     }
 }
