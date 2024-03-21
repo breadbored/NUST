@@ -22,7 +22,11 @@ pub struct CPU {
 
     // CPU state
     status: Status,
-    reset: bool,
+
+    // Interrupts
+    reset_requested: bool,
+    irq_requested: bool,
+    nmi_requested: bool,
     jammed: bool,
 }
 
@@ -58,7 +62,10 @@ impl CPU {
                 zero: false,
                 carry: false,
             },
-            reset: true,
+
+            reset_requested: true,
+            irq_requested: false,
+            nmi_requested: false,
             jammed: false,
         }
     }
@@ -69,15 +76,40 @@ impl CPU {
         ram: &Arc<Mutex<Vec<u8>>>,
         vram: &Arc<Mutex<Vec<u8>>>,
     ) -> u64 {
-        if self.reset {
+        if self.reset_requested {
             println!("Resetting CPU");
             // self.reset_vector = ((rom.header.prg_rom_size as u16 * 0x4000) % 0x8000) - 4 + 0x7FFF;
             println!("Reset Vector {:X}", RESET_VECTOR);
             let high = self.get_mapped_byte(rom.clone(), ram, RESET_VECTOR as usize) as u16;
             let low = self.get_mapped_byte(rom.clone(), ram, RESET_VECTOR as usize + 1) as u16;
             self.pc = (low << 8) | high;
+            // self.pc = 0xC000;
             println!("PC: {:X}", self.pc);
-            self.reset = false;
+            self.reset_requested = false;
+            return 0;
+        }
+
+        if self.nmi_requested {
+            println!("NMI");
+            self.nmi_requested = false;
+            self.push_stack_word(ram, self.pc);
+            self.push_stack(ram, self.s);
+            self.push_stack(ram, self.status.get_byte());
+            self.status.interrupt_disable = true;
+            self.status.break_mode = false;
+            self.pc = 0xFFFA;
+            return 0;
+        }
+
+        if self.irq_requested {
+            println!("IRQ");
+            self.irq_requested = false;
+            self.push_stack_word(ram, self.pc);
+            self.push_stack(ram, self.s);
+            self.push_stack(ram, self.status.get_byte());
+            self.status.interrupt_disable = true;
+            self.status.break_mode = false;
+            self.pc = 0xFFFE;
             return 0;
         }
 
@@ -98,7 +130,7 @@ impl CPU {
             }
             0xA1 | 0xB1 | 0xA5 | 0xB5 | 0xA9 | 0xB9 | 0xAD | 0xBD => {
                 // LDA
-                println!("LDA");
+                println!("LDA 0x{:X}{:X}", operand, operand2);
                 return lda(self, instruction, operand, operand2, rom.clone(), ram);
             }
             0xA2 | 0xA6 | 0xB6 | 0xAE | 0xBE => {
@@ -373,6 +405,11 @@ impl CPU {
                 println!("TYA");
                 return tya(self, instruction, rom.clone(), ram);
             }
+            0xEA => {
+                // NOP
+                println!("NOP");
+                return nop(self, instruction);
+            }
             _ => {
                 println!("Unknown instruction: 0x{:X?}", instruction);
                 return nop(self, instruction);
@@ -560,10 +597,21 @@ impl CPU {
         self.sp -= 1;
     }
 
+    pub fn push_stack_word(&mut self, ram: &Arc<Mutex<Vec<u8>>>, value: u16) {
+        self.push_stack(ram, (value >> 8) as u8);
+        self.push_stack(ram, value as u8);
+    }
+
     pub fn pop_stack(&mut self, ram: &Arc<Mutex<Vec<u8>>>) -> u8 {
         let ram = ram.lock().unwrap();
         self.sp += 1;
         return ram[0x100 | self.sp as usize];
+    }
+
+    pub fn pop_stack_word(&mut self, ram: &Arc<Mutex<Vec<u8>>>) -> u16 {
+        let low = self.pop_stack(ram) as u16;
+        let high = self.pop_stack(ram) as u16;
+        return (high << 8) | low;
     }
 
     pub fn set_flags(&mut self) {

@@ -16,7 +16,9 @@ pub fn sbc(
     match instruction {
         0xE9 => {
             // Immediate
-            let result = cpu.a as u16 - operand as u16 - (1 - cpu.status.carry as u16);
+            let result = (cpu.a as u16)
+                .wrapping_sub(operand as u16)
+                .wrapping_sub(1 - cpu.status.carry as u16);
             cpu.status.zero = result as u8 > 0;
             cpu.status.negative = result as u8 > 0;
             cpu.status.carry = result < 0x100;
@@ -30,7 +32,9 @@ pub fn sbc(
             // Zero Page
             let addr = operand as usize;
             let value = cpu.get_mapped_byte(rom.clone(), &ram.clone(), addr);
-            let result = cpu.a as u16 - value as u16 - (1 - cpu.status.carry as u16);
+            let result = (cpu.a as u16)
+                .wrapping_sub(value as u16)
+                .wrapping_sub(1 - cpu.status.carry as u16);
             cpu.status.zero = result as u8 > 0;
             cpu.status.negative = result as u8 > 0;
             cpu.status.carry = result < 0x100;
@@ -44,7 +48,9 @@ pub fn sbc(
             // Zero Page, X
             let addr = (operand + cpu.x) as usize;
             let value = cpu.get_mapped_byte(rom.clone(), &ram.clone(), addr);
-            let result = cpu.a as u16 - value as u16 - (1 - cpu.status.carry as u16);
+            let result = (cpu.a as u16)
+                .wrapping_sub(value as u16)
+                .wrapping_sub(1 - cpu.status.carry as u16);
             cpu.status.zero = result as u8 > 0;
             cpu.status.negative = result as u8 > 0;
             cpu.status.carry = result < 0x100;
@@ -58,7 +64,9 @@ pub fn sbc(
             // Absolute
             let addr = operand as u16 | ((operand2 as u16) << 8);
             let value = cpu.get_mapped_byte(rom.clone(), &ram.clone(), addr as usize);
-            let result = cpu.a as u16 - value as u16 - (1 - cpu.status.carry as u16);
+            let result = (cpu.a as u16)
+                .wrapping_sub(value as u16)
+                .wrapping_sub(1 - cpu.status.carry as u16);
             cpu.status.zero = result as u8 > 0;
             cpu.status.negative = result as u8 > 0;
             cpu.status.carry = result < 0x100;
@@ -72,7 +80,9 @@ pub fn sbc(
             // Absolute, X
             let addr = (operand as u16 | ((operand2 as u16) << 8)).wrapping_add(cpu.x as u16);
             let value = cpu.get_mapped_byte(rom.clone(), &ram.clone(), addr as usize);
-            let result = cpu.a as u16 - value as u16 - (1 - cpu.status.carry as u16);
+            let result = (cpu.a as u16)
+                .wrapping_sub(value as u16)
+                .wrapping_sub(1 - cpu.status.carry as u16);
             cpu.status.zero = result as u8 > 0;
             cpu.status.negative = result as u8 > 0;
             cpu.status.carry = result < 0x100;
@@ -86,7 +96,9 @@ pub fn sbc(
             // Absolute, Y
             let addr = (operand as u16 | ((operand2 as u16) << 8)).wrapping_add(cpu.y as u16);
             let value = cpu.get_mapped_byte(rom.clone(), &ram.clone(), addr as usize);
-            let result = cpu.a as u16 - value as u16 - (1 - cpu.status.carry as u16);
+            let result = (cpu.a as u16)
+                .wrapping_sub(value as u16)
+                .wrapping_sub(1 - cpu.status.carry as u16);
             cpu.status.zero = result as u8 > 0;
             cpu.status.negative = result as u8 > 0;
             cpu.status.carry = result < 0x100;
@@ -103,7 +115,9 @@ pub fn sbc(
             let hi = cpu.get_mapped_byte(rom.clone(), &ram.clone(), addr + 1);
             let ptr = lo as u16 | ((hi as u16) << 8);
             let value = cpu.get_mapped_byte(rom.clone(), &ram.clone(), ptr as usize);
-            let result = cpu.a as u16 - value as u16 - (1 - cpu.status.carry as u16);
+            let result = (cpu.a as u16)
+                .wrapping_sub(value as u16)
+                .wrapping_sub(1 - cpu.status.carry as u16);
             cpu.status.zero = result as u8 > 0;
             cpu.status.negative = result as u8 > 0;
             cpu.status.carry = result < 0x100;
@@ -121,7 +135,9 @@ pub fn sbc(
             let ptr = lo as u16 | ((hi as u16) << 8);
             let value =
                 cpu.get_mapped_byte(rom.clone(), &ram.clone(), ptr as usize + cpu.y as usize);
-            let result = cpu.a as u16 - value as u16 - (1 - cpu.status.carry as u16);
+            let result = (cpu.a as u16)
+                .wrapping_sub(value as u16)
+                .wrapping_sub(1 - cpu.status.carry as u16);
             cpu.status.zero = result as u8 > 0;
             cpu.status.negative = result as u8 > 0;
             cpu.status.carry = result < 0x100;
