@@ -7,7 +7,7 @@ use instructions::RESET_VECTOR;
 use instructions::{
     adc, and, asl, bcc, bcs, beq, bit, bmi, bne, bpl, brk, bvc, bvs, clc, cld, cli, clv, cmp, cpx,
     cpy, dec, dex, dey, eor, inc, inx, iny, jmp, jsr, lda, ldx, ldy, nop, ora, pha, php, pla, plp,
-    sta, stx, sty,
+    rol, ror, rti, rts, sbc, sec, sed, sei, sta, stx, sty,
 };
 
 #[derive(Clone, Copy)]
@@ -297,6 +297,51 @@ impl CPU {
                 // PLP
                 println!("PLP");
                 return plp(self, instruction, rom.clone(), ram);
+            }
+            0x28 => {
+                // PLP
+                println!("PLP");
+                return plp(self, instruction, rom.clone(), ram);
+            }
+            0x2A | 0x26 | 0x36 | 0x2E | 0x3E => {
+                // ROL
+                println!("ROL");
+                return rol(self, instruction, operand, operand2, rom.clone(), ram);
+            }
+            0x6A | 0x66 | 0x76 | 0x6E | 0x7E => {
+                // ROR
+                println!("ROR");
+                return ror(self, instruction, operand, operand2, rom.clone(), ram);
+            }
+            0x40 => {
+                // RTI
+                println!("RTI");
+                return rti(self, instruction, rom.clone(), ram);
+            }
+            0x60 => {
+                // RTS
+                println!("RTS");
+                return rts(self, instruction, rom.clone(), ram);
+            }
+            0xE9 | 0xE5 | 0xF5 | 0xED | 0xFD | 0xF9 | 0xE1 | 0xF1 => {
+                // SBC
+                println!("SBC");
+                return sbc(self, instruction, operand, operand2, rom.clone(), ram);
+            }
+            0x38 => {
+                // SEC
+                println!("SEC");
+                return sec(self, instruction, rom.clone(), ram);
+            }
+            0xF8 => {
+                // SED
+                println!("SED");
+                return sed(self, instruction, rom.clone(), ram);
+            }
+            0x78 => {
+                // SEI
+                println!("SEI");
+                return sei(self, instruction, rom.clone(), ram);
             }
             _ => {
                 println!("Unknown instruction: 0x{:X?}", instruction);
