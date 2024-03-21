@@ -91,12 +91,32 @@ Multithreading has been removed as it is uncessary with the current timing metho
     - [x] STA (Store Accumulator) [Zero Page, Zero Page X, Absolute, Absolute X, Absolute Y, Indirect X, Indirect Y]
     - [x] STX (Store X Register) [Zero Page, Zero Page Y, Absolute]
     - [x] STY (Store Y Register) [Zero Page, Zero Page X, Absolute]
-    - [ ] TAX (Transfer Accumulator to X) [Implied]
-    - [ ] TAY (Transfer Accumulator to Y) [Implied]
-    - [ ] TSX (Transfer Stack Pointer to X) [Implied]
-    - [ ] TXA (Transfer X to Accumulator) [Implied]
-    - [ ] TXS (Transfer X to Stack Pointer) [Implied]
-    - [ ] TYA (Transfer Y to Accumulator) [Implied]
+    - [x] TAX (Transfer Accumulator to X) [Implied]
+    - [x] TAY (Transfer Accumulator to Y) [Implied]
+    - [x] TSX (Transfer Stack Pointer to X) [Implied]
+    - [x] TXA (Transfer X to Accumulator) [Implied]
+    - [x] TXS (Transfer X to Stack Pointer) [Implied]
+    - [x] TYA (Transfer Y to Accumulator) [Implied]
+    - [ ] Illegal Opcodes
+      - [ ] AHX
+      - [ ] ALR
+      - [ ] ANC
+      - [ ] ARR
+      - [ ] AXS
+      - [ ] DCP
+      - [ ] ISC
+      - [ ] KIL
+      - [ ] LAS
+      - [ ] LAX
+      - [ ] RLA
+      - [ ] RRA
+      - [ ] SAX
+      - [ ] SHX
+      - [ ] SHY
+      - [ ] SLO
+      - [ ] SRE
+      - [ ] TAS
+      - [ ] XAA
   - [ ] Implement vram reading/writing and blocking while vram is in use by PPU
 - [ ] PPU
   - [ ] Implement registers
