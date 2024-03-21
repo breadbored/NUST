@@ -7,7 +7,7 @@ use instructions::RESET_VECTOR;
 use instructions::{
     adc, and, asl, bcc, bcs, beq, bit, bmi, bne, bpl, brk, bvc, bvs, clc, cld, cli, clv, cmp, cpx,
     cpy, dec, dex, dey, eor, inc, inx, iny, jmp, jsr, lda, ldx, ldy, nop, ora, pha, php, pla, plp,
-    rol, ror, rti, rts, sbc, sec, sed, sei, sta, stx, sty,
+    rol, ror, rti, rts, sbc, sec, sed, sei, sta, stx, sty, tax, tay, tsx, txa, txs, tya,
 };
 
 #[derive(Clone, Copy)]
@@ -342,6 +342,36 @@ impl CPU {
                 // SEI
                 println!("SEI");
                 return sei(self, instruction, rom.clone(), ram);
+            }
+            0xAA => {
+                // TAX
+                println!("TAX");
+                return tax(self, instruction, rom.clone(), ram);
+            }
+            0xA8 => {
+                // TAY
+                println!("TAY");
+                return tay(self, instruction, rom.clone(), ram);
+            }
+            0xBA => {
+                // TSX
+                println!("TSX");
+                return tsx(self, instruction, rom.clone(), ram);
+            }
+            0x8A => {
+                // TXA
+                println!("TXA");
+                return txa(self, instruction, rom.clone(), ram);
+            }
+            0x9A => {
+                // TXS
+                println!("TXS");
+                return txs(self, instruction, rom.clone(), ram);
+            }
+            0x98 => {
+                // TYA
+                println!("TYA");
+                return tya(self, instruction, rom.clone(), ram);
             }
             _ => {
                 println!("Unknown instruction: 0x{:X?}", instruction);
