@@ -6,7 +6,7 @@ use crate::cartridge::Cartridge;
 use instructions::RESET_VECTOR;
 use instructions::{
     adc, and, asl, bcc, bcs, beq, bit, bmi, bne, bpl, brk, bvc, bvs, clc, cld, cli, clv, cmp, cpx,
-    cpy, dec, dex, dey, jmp, jsr, lda, ldx, ldy, nop, ora, sta, stx, sty,
+    cpy, dec, dex, dey, eor, inc, inx, iny, jmp, jsr, lda, ldx, ldy, nop, ora, sta, stx, sty,
 };
 
 #[derive(Clone, Copy)]
@@ -256,6 +256,26 @@ impl CPU {
                 // CPY
                 println!("CPY");
                 return cpy(self, instruction, operand, operand2, rom.clone(), ram);
+            }
+            0x49 | 0x45 | 0x55 | 0x4D | 0x5D | 0x59 | 0x41 | 0x51 => {
+                // EOR
+                println!("EOR");
+                return eor(self, instruction, operand, operand2, rom.clone(), ram);
+            }
+            0xE6 | 0xF6 | 0xEE | 0xFE => {
+                // INC
+                println!("INC");
+                return inc(self, instruction, operand, operand2, rom.clone(), ram);
+            }
+            0xE8 => {
+                // INX
+                println!("INX");
+                return inx(self, instruction, rom.clone(), ram);
+            }
+            0xC8 => {
+                // INY
+                println!("INY");
+                return iny(self, instruction, rom.clone(), ram);
             }
             _ => {
                 println!("Unknown instruction: 0x{:X?}", instruction);
