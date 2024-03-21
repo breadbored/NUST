@@ -1,3 +1,6 @@
+/**
+* This is not an instruction, this is a module that contains all the instructions
+*/
 pub mod adc;
 pub mod and;
 pub mod asl;
@@ -33,6 +36,10 @@ pub mod ldx;
 pub mod ldy;
 pub mod nop;
 pub mod ora;
+pub mod pha;
+pub mod php;
+pub mod pla;
+pub mod plp;
 pub mod sta;
 pub mod stx;
 pub mod sty;
@@ -72,6 +79,10 @@ pub use ldx::ldx;
 pub use ldy::ldy;
 pub use nop::nop;
 pub use ora::ora;
+pub use pha::pha;
+pub use php::php;
+pub use pla::pla;
+pub use plp::plp;
 pub use sta::sta;
 pub use stx::stx;
 pub use sty::sty;

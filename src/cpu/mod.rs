@@ -6,7 +6,8 @@ use crate::cartridge::Cartridge;
 use instructions::RESET_VECTOR;
 use instructions::{
     adc, and, asl, bcc, bcs, beq, bit, bmi, bne, bpl, brk, bvc, bvs, clc, cld, cli, clv, cmp, cpx,
-    cpy, dec, dex, dey, eor, inc, inx, iny, jmp, jsr, lda, ldx, ldy, nop, ora, sta, stx, sty,
+    cpy, dec, dex, dey, eor, inc, inx, iny, jmp, jsr, lda, ldx, ldy, nop, ora, pha, php, pla, plp,
+    sta, stx, sty,
 };
 
 #[derive(Clone, Copy)]
@@ -277,6 +278,26 @@ impl CPU {
                 println!("INY");
                 return iny(self, instruction, rom.clone(), ram);
             }
+            0x48 => {
+                // PHA
+                println!("PHA");
+                return pha(self, instruction, rom.clone(), ram);
+            }
+            0x68 => {
+                // PLA
+                println!("PLA");
+                return pla(self, instruction, rom.clone(), ram);
+            }
+            0x08 => {
+                // PHP
+                println!("PHP");
+                return php(self, instruction, rom.clone(), ram);
+            }
+            0x28 => {
+                // PLP
+                println!("PLP");
+                return plp(self, instruction, rom.clone(), ram);
+            }
             _ => {
                 println!("Unknown instruction: 0x{:X?}", instruction);
                 return nop(self, instruction);
@@ -501,5 +522,42 @@ impl CPU {
             address + self.y as u16
         };
         return indirect_address;
+    }
+}
+
+impl Status {
+    pub fn new() -> Status {
+        Status {
+            carry: false,
+            zero: false,
+            interrupt_disable: false,
+            decimal_mode: false,
+            break_mode: false,
+            reserved: true,
+            overflow: false,
+            negative: false,
+        }
+    }
+
+    pub fn get_byte(&self) -> u8 {
+        return self.carry as u8
+            | (self.zero as u8) << 1
+            | (self.interrupt_disable as u8) << 2
+            | (self.decimal_mode as u8) << 3
+            | (self.break_mode as u8) << 4
+            | (self.reserved as u8) << 5
+            | (self.overflow as u8) << 6
+            | (self.negative as u8) << 7;
+    }
+
+    pub fn set_byte(&mut self, value: u8) {
+        self.carry = (value & 0x01) != 0;
+        self.zero = (value & 0x02) != 0;
+        self.interrupt_disable = (value & 0x04) != 0;
+        self.decimal_mode = (value & 0x08) != 0;
+        self.break_mode = (value & 0x10) != 0;
+        self.reserved = (value & 0x20) != 0;
+        self.overflow = (value & 0x40) != 0;
+        self.negative = (value & 0x80) != 0;
     }
 }
