@@ -3,6 +3,7 @@ mod instructions;
 use std::sync::{Arc, Mutex};
 
 use crate::cartridge::Cartridge;
+use crate::cpu::instructions::{IRQ_VECTOR, NMI_VECTOR};
 use instructions::RESET_VECTOR;
 use instructions::{
     adc, and, asl, bcc, bcs, beq, bit, bmi, bne, bpl, brk, bvc, bvs, clc, cld, cli, clv, cmp, cpx,
@@ -80,9 +81,9 @@ impl CPU {
             println!("Resetting CPU");
             // self.reset_vector = ((rom.header.prg_rom_size as u16 * 0x4000) % 0x8000) - 4 + 0x7FFF;
             println!("Reset Vector {:X}", RESET_VECTOR);
-            let high = self.get_mapped_byte(rom.clone(), ram, RESET_VECTOR as usize) as u16;
-            let low = self.get_mapped_byte(rom.clone(), ram, RESET_VECTOR as usize + 1) as u16;
-            self.pc = (low << 8) | high;
+            let low = self.get_mapped_byte(rom.clone(), ram, RESET_VECTOR as usize) as u16;
+            let high = self.get_mapped_byte(rom.clone(), ram, RESET_VECTOR as usize + 1) as u16;
+            self.pc = (high << 8) | low;
             // self.pc = 0xC000;
             println!("PC: {:X}", self.pc);
             self.reset_requested = false;
@@ -90,26 +91,30 @@ impl CPU {
         }
 
         if self.nmi_requested {
-            println!("NMI");
+            println!("NMI --------------------------------");
             self.nmi_requested = false;
             self.push_stack_word(ram, self.pc);
             self.push_stack(ram, self.s);
             self.push_stack(ram, self.status.get_byte());
             self.status.interrupt_disable = true;
             self.status.break_mode = false;
-            self.pc = 0xFFFA;
+            let low = self.get_mapped_byte(rom.clone(), ram, NMI_VECTOR as usize) as u16;
+            let high = self.get_mapped_byte(rom.clone(), ram, NMI_VECTOR as usize + 1) as u16;
+            self.pc = (high << 8) | low;
             return 0;
         }
 
         if self.irq_requested {
-            println!("IRQ");
+            println!("IRQ --------------------------------");
             self.irq_requested = false;
             self.push_stack_word(ram, self.pc);
             self.push_stack(ram, self.s);
             self.push_stack(ram, self.status.get_byte());
             self.status.interrupt_disable = true;
             self.status.break_mode = false;
-            self.pc = 0xFFFE;
+            let low = self.get_mapped_byte(rom.clone(), ram, IRQ_VECTOR as usize) as u16;
+            let high = self.get_mapped_byte(rom.clone(), ram, IRQ_VECTOR as usize + 1) as u16;
+            self.pc = (high << 8) | low;
             return 0;
         }
 
@@ -122,7 +127,7 @@ impl CPU {
         // we call this before every instruction to sync the status register with the flags.
         self.set_flags();
 
-        match instruction {
+        match (instruction as u8) & 0xFF {
             0x01 | 0x11 | 0x05 | 0x15 | 0x09 | 0x19 | 0x0D | 0x1D => {
                 // ORA
                 println!("ORA");
@@ -130,7 +135,7 @@ impl CPU {
             }
             0xA1 | 0xB1 | 0xA5 | 0xB5 | 0xA9 | 0xB9 | 0xAD | 0xBD => {
                 // LDA
-                println!("LDA 0x{:X}{:X}", operand, operand2);
+                println!("LDA {:#04X?}", ((operand2 as u16) << 8) | operand as u16);
                 return lda(self, instruction, operand, operand2, rom.clone(), ram);
             }
             0xA2 | 0xA6 | 0xB6 | 0xAE | 0xBE => {
@@ -167,7 +172,7 @@ impl CPU {
             }
             0x4C | 0x6C => {
                 // JMP
-                println!("JMP 0x{:X?}{:X?}", operand, operand2);
+                println!("JMP {:#04X?}", ((operand2 as u16) << 8) | operand as u16);
                 return jmp(self, instruction, operand, operand2, rom.clone(), ram);
             }
             0xD0 => {
@@ -411,7 +416,7 @@ impl CPU {
                 return nop(self, instruction);
             }
             _ => {
-                println!("Unknown instruction: 0x{:X?}", instruction);
+                println!("Unknown instruction: {:#04X?}", instruction);
                 return nop(self, instruction);
             }
         }
@@ -645,6 +650,14 @@ impl CPU {
             address + self.y as u16
         };
         return indirect_address;
+    }
+
+    pub fn request_irq_interrupt(&mut self) {
+        self.irq_requested = true;
+    }
+
+    pub fn request_nmi_interrupt(&mut self) {
+        self.nmi_requested = true;
     }
 }
 

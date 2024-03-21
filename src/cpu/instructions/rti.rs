@@ -10,9 +10,7 @@ pub fn rti(cpu: &mut CPU, instruction: u8, rom: Cartridge, ram: &Arc<Mutex<Vec<u
             // Implied
             let stack_result = cpu.pop_stack(&ram.clone());
             cpu.status.set_byte(stack_result);
-            let low = cpu.pop_stack(&ram.clone());
-            let high = cpu.pop_stack(&ram.clone());
-            cpu.pc = ((high as u16) << 8) | (low as u16);
+            cpu.pc = cpu.pop_stack_word(&ram.clone());
             cycles = 6;
         }
         _ => {}

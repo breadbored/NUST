@@ -36,6 +36,8 @@ fn main() {
     let mut last_ppu_cycle: u128 = get_time();
     let mut last_apu_cycle: u128 = get_time();
 
+    let mut last_draw_time: u128 = get_time();
+
     // System Event Loop
     let mut tx = 0;
     let mut ty = 0;
@@ -46,13 +48,11 @@ fn main() {
             match event {
                 Event::Quit { .. } => break 'running,
                 Event::KeyDown { .. } => {
-                    // println!("Key down");
+                    cpu.request_irq_interrupt();
                 }
                 _ => {}
             }
         }
-
-        // println!("Running");
 
         (last_cpu_cycle, last_ppu_cycle, last_apu_cycle) = run_processor(
             last_cpu_cycle,
@@ -64,33 +64,29 @@ fn main() {
             vram.clone(),
         );
 
-        // Move tx (top X), ty (top Y), bx (bottom X), and by (bottom Y) around the screen in a circle
-        tx = (tx + 1) % 256;
-        ty = (ty + 1) % 240;
-        bx = (bx + 1) % 256;
-        by = (by + 1) % 240;
+        // Render at 60 FPS
+        if get_time() - last_draw_time > (1_000_000_000u128 / 60) {
+            // Move tx (top X), ty (top Y), bx (bottom X), and by (bottom Y) around the screen in a circle
+            tx = (tx + 1) % 256;
+            ty = (ty + 1) % 240;
+            bx = (bx + 1) % 256;
+            by = (by + 1) % 240;
 
-        canvas.set_draw_color(Color::RGB(0, 0, 0));
-        canvas.clear();
-        canvas.set_draw_color(Color::RGB(255, 255, 255));
-        canvas
-            .draw_line(
-                Point::new(tx, ty),
-                Point::new(bx * (SCALE as i32) - 1, by * (SCALE as i32) - 1),
-            )
-            .unwrap();
+            canvas.set_draw_color(Color::RGB(0, 0, 0));
+            canvas.clear();
+            canvas.set_draw_color(Color::RGB(255, 255, 255));
+            canvas
+                .draw_line(
+                    Point::new(tx, ty),
+                    Point::new(bx * (SCALE as i32) - 1, by * (SCALE as i32) - 1),
+                )
+                .unwrap();
 
-        // i = (i + 1) % 255;
-        // canvas.set_draw_color(Color::RGB(i, 64, 255 - i));
-        // let (w, h) = canvas.output_size().unwrap();
-        // let mut points = [Point::new(0, 0); 256];
-        // points.fill_with(|| Point::new(rng.gen_range(0..w as i32), rng.gen_range(0..h as i32)));
-        // // For performance, it's probably better to draw a whole bunch of points at once
-        // canvas.draw_points(points.as_slice()).unwrap();
+            canvas.present();
+            last_draw_time = get_time();
+        }
 
-        canvas.present();
-
-        ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60)); // sloppy FPS limit
+        // ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60)); // sloppy FPS limit
     }
 }
 

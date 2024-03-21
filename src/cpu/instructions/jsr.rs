@@ -17,7 +17,7 @@ pub fn jsr(
         0x20 => {
             // Absolute
             let addr = (operand as u16) | ((operand2 as u16) << 8);
-            let pc = cpu.pc + 2;
+            let pc = cpu.pc - 1;
             cpu.push_stack(&ram.clone(), (pc >> 8) as u8);
             cpu.push_stack(&ram.clone(), pc as u8);
             cpu.pc = addr;
