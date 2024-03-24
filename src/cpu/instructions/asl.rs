@@ -1,5 +1,6 @@
 use crate::cartridge::Cartridge;
 use crate::cpu::CPU;
+use crate::system::System;
 use std::sync::Arc;
 use std::sync::Mutex;
 
@@ -8,8 +9,7 @@ pub fn asl(
     instruction: u8,
     operand: u8,
     operand2: u8,
-    rom: Cartridge,
-    ram: &Arc<Mutex<Vec<u8>>>,
+    system: &mut Arc<Mutex<System>>,
 ) -> u64 {
     let mut cycles: u64 = 2;
 
@@ -26,10 +26,10 @@ pub fn asl(
         0x06 => {
             // Zero Page
             let addr = operand as usize;
-            let value = cpu.get_mapped_byte(rom.clone(), &ram.clone(), addr);
+            let value = cpu.get_mapped_byte(&mut system.clone(), addr);
             let carry = value & 0x80;
             let result = value << 1;
-            cpu.set_mapped_byte(rom.clone(), &ram.clone(), addr, result);
+            cpu.set_mapped_byte(&mut system.clone(), addr, result);
             cpu.status.carry = carry > 0;
             cpu.status.zero = cpu.a == 0;
             cpu.pc += 2;
@@ -38,10 +38,10 @@ pub fn asl(
         0x16 => {
             // Zero Page, X
             let addr = (operand + cpu.x) as usize;
-            let value = cpu.get_mapped_byte(rom.clone(), &ram.clone(), addr);
+            let value = cpu.get_mapped_byte(&mut system.clone(), addr);
             let carry = value & 0x80;
             let result = value << 1;
-            cpu.set_mapped_byte(rom.clone(), &ram.clone(), addr, result);
+            cpu.set_mapped_byte(&mut system.clone(), addr, result);
             cpu.status.carry = carry > 0;
             cpu.status.zero = cpu.a == 0;
             cpu.pc += 2;
@@ -50,10 +50,10 @@ pub fn asl(
         0x0E => {
             // Absolute
             let addr = (operand as usize) | ((operand2 as usize) << 8);
-            let value = cpu.get_mapped_byte(rom.clone(), &ram.clone(), addr);
+            let value = cpu.get_mapped_byte(&mut system.clone(), addr);
             let carry = value & 0x80;
             let result = value << 1;
-            cpu.set_mapped_byte(rom.clone(), &ram.clone(), addr, result);
+            cpu.set_mapped_byte(&mut system.clone(), addr, result);
             cpu.status.carry = carry > 0;
             cpu.status.zero = cpu.a == 0;
             cpu.pc += 3;
@@ -62,10 +62,10 @@ pub fn asl(
         0x1E => {
             // Absolute, X
             let addr = (operand as usize) | ((operand2 as usize) << 8) + cpu.x as usize;
-            let value = cpu.get_mapped_byte(rom.clone(), &ram.clone(), addr);
+            let value = cpu.get_mapped_byte(&mut system.clone(), addr);
             let carry = value & 0x80;
             let result = value << 1;
-            cpu.set_mapped_byte(rom.clone(), &ram.clone(), addr, result);
+            cpu.set_mapped_byte(&mut system.clone(), addr, result);
             cpu.status.carry = carry > 0;
             cpu.status.zero = cpu.a == 0;
             cpu.pc += 3;

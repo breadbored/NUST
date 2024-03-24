@@ -1,5 +1,6 @@
 use crate::cartridge::Cartridge;
 use crate::cpu::CPU;
+use crate::system::System;
 use std::sync::Arc;
 use std::sync::Mutex;
 
@@ -8,8 +9,7 @@ pub fn dec(
     instruction: u8,
     operand: u8,
     operand2: u8,
-    rom: Cartridge,
-    ram: &Arc<Mutex<Vec<u8>>>,
+    system: &mut Arc<Mutex<System>>,
 ) -> u64 {
     let mut cycles: u64 = 2;
 
@@ -18,9 +18,9 @@ pub fn dec(
             // Zero Page
             let addr = operand as usize;
             let value = cpu
-                .get_mapped_byte(rom.clone(), &ram.clone(), addr)
+                .get_mapped_byte(&mut system.clone(), addr)
                 .wrapping_sub(1);
-            cpu.set_mapped_byte(rom.clone(), &ram.clone(), addr, value);
+            cpu.set_mapped_byte(&mut system.clone(), addr, value);
             cpu.status.zero = value == 0;
             cpu.status.negative = value & 0x80 != 0;
             cpu.pc += 2;
@@ -30,9 +30,9 @@ pub fn dec(
             // Zero Page, X
             let addr = (operand + cpu.x) as usize;
             let value = cpu
-                .get_mapped_byte(rom.clone(), &ram.clone(), addr)
+                .get_mapped_byte(&mut system.clone(), addr)
                 .wrapping_sub(1);
-            cpu.set_mapped_byte(rom.clone(), &ram.clone(), addr, value);
+            cpu.set_mapped_byte(&mut system.clone(), addr, value);
             cpu.status.zero = value == 0;
             cpu.status.negative = value & 0x80 != 0;
             cpu.pc += 2;
@@ -42,9 +42,9 @@ pub fn dec(
             // Absolute
             let addr = (operand as usize) | ((operand2 as usize) << 8);
             let value = cpu
-                .get_mapped_byte(rom.clone(), &ram.clone(), addr)
+                .get_mapped_byte(&mut system.clone(), addr)
                 .wrapping_sub(1);
-            cpu.set_mapped_byte(rom.clone(), &ram.clone(), addr, value);
+            cpu.set_mapped_byte(&mut system.clone(), addr, value);
             cpu.status.zero = value == 0;
             cpu.status.negative = value & 0x80 != 0;
             cpu.pc += 3;
@@ -55,9 +55,9 @@ pub fn dec(
             let addr =
                 ((operand as usize) | ((operand2 as usize) << 8)).wrapping_add(cpu.x as usize);
             let value = cpu
-                .get_mapped_byte(rom.clone(), &ram.clone(), addr)
+                .get_mapped_byte(&mut system.clone(), addr)
                 .wrapping_sub(1);
-            cpu.set_mapped_byte(rom.clone(), &ram.clone(), addr, value);
+            cpu.set_mapped_byte(&mut system.clone(), addr, value);
             cpu.status.zero = value == 0;
             cpu.status.negative = value & 0x80 != 0;
             cpu.pc += 3;

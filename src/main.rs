@@ -1,19 +1,20 @@
 mod cartridge;
 mod cpu;
 mod ppu;
+mod system;
 
-use cartridge::{get_rom, Cartridge};
 use rand::distributions::uniform::SampleBorrow;
 use sdl2::event::Event;
-use sdl2::rect::Point;
 use std::{
     sync::{Arc, Mutex},
-    time::{Duration, SystemTime},
+    time::SystemTime,
 };
 
 use crate::ppu::PPU;
-use crate::{cpu::CPU, ppu::Color as NesColor, ppu::Screen};
+use crate::{cpu::CPU, ppu::Screen};
+use cartridge::{get_rom, Cartridge};
 use sdl2::pixels::Color;
+use system::System;
 
 fn main() {
     // System
@@ -21,19 +22,16 @@ fn main() {
     let sdl_context = sdl2::init().unwrap();
     let video_subsystem = sdl_context.video().unwrap();
     let window = video_subsystem
-        .window("rust-sdl2 demo", 256 * SCALE as u32, 240 * SCALE as u32)
+        .window("CARESemu", 256 * SCALE as u32, 240 * SCALE as u32)
         .position_centered()
         .build()
         .unwrap();
     let mut canvas = window.into_canvas().build().unwrap();
     let mut event_pump = sdl_context.event_pump().unwrap();
 
-    // // Emulator
-    let mut cpu: CPU = CPU::new();
-    let mut ppu: PPU = PPU::new();
+    // Emulator
     let mut rom: Cartridge = get_rom();
-    let ram: Arc<Mutex<Vec<u8>>> = Arc::new(Mutex::new(vec![0; 0x800]));
-    let vram: Arc<Mutex<Vec<u8>>> = Arc::new(Mutex::new(vec![0; 0x800]));
+    let system = Arc::new(Mutex::new(System::new(rom.clone())));
 
     let mut last_cpu_cycle: u128 = get_time();
     let mut last_ppu_cycle: u128 = get_time();
@@ -42,16 +40,18 @@ fn main() {
     let mut last_draw_time: u128 = get_time();
 
     // System Event Loop
-    let mut tx = 0;
-    let mut ty = 0;
-    let mut bx = 256;
-    let mut by = 240;
     'running: loop {
         for event in event_pump.poll_iter() {
             match event {
                 Event::Quit { .. } => break 'running,
                 Event::KeyDown { .. } => {
-                    cpu.request_irq_interrupt();
+                    system
+                        .lock()
+                        .unwrap()
+                        .cpu
+                        .lock()
+                        .unwrap()
+                        .request_irq_interrupt();
                 }
                 _ => {}
             }
@@ -61,32 +61,14 @@ fn main() {
             last_cpu_cycle,
             last_ppu_cycle,
             last_apu_cycle,
-            &mut cpu,
-            &mut ppu,
-            &mut rom,
-            ram.clone(),
-            vram.clone(),
+            &mut system.clone(),
         );
 
         // Render at 60 FPS
         if get_time() - last_draw_time > (1_000_000_000u128 / 60) {
-            // Move tx (top X), ty (top Y), bx (bottom X), and by (bottom Y) around the screen in a circle
-            tx = (tx + 1) % 256;
-            ty = (ty + 1) % 240;
-            bx = (bx + 1) % 256;
-            by = (by + 1) % 240;
-
-            canvas.set_draw_color(Color::RGB(0, 0, 0));
             canvas.clear();
-            canvas.set_draw_color(Color::RGB(255, 255, 255));
-            canvas
-                .draw_line(
-                    Point::new(tx, ty),
-                    Point::new(bx * (SCALE as i32) - 1, by * (SCALE as i32) - 1),
-                )
-                .unwrap();
-
-            let screen: Screen = ppu.get_screen(rom.clone());
+            let ppu = system.lock().unwrap().ppu.clone();
+            let screen: Screen = ppu.lock().unwrap().get_screen(rom.clone());
 
             // Draw the screen
             for y in 0..240 {
@@ -124,11 +106,7 @@ fn run_processor(
     mut last_cpu_cycle: u128,
     mut last_ppu_cycle: u128,
     mut last_apu_cycle: u128,
-    cpu: &mut CPU,
-    ppu: &mut PPU,
-    rom: &mut Cartridge,
-    ram: Arc<Mutex<Vec<u8>>>,
-    vram: Arc<Mutex<Vec<u8>>>,
+    system: &mut Arc<Mutex<System>>,
 ) -> (u128, u128, u128) {
     // println!("Running processor");
     const CPU_CYCLES: u128 = 559; // 1.79 MHz
@@ -139,10 +117,11 @@ fn run_processor(
     let check_cpu_time = get_time();
     if check_cpu_time - last_cpu_cycle.borrow() >= CPU_CYCLES {
         // println!("Running CPU");
-        let cycles_ran = cpu.tick(rom.clone(), &ram, &vram);
+        let cpu = system.lock().unwrap().cpu.clone();
+        let cycles_ran = cpu.lock().unwrap().tick(&mut system.clone());
         last_cpu_cycle = get_time()
             + (CPU_CYCLES * cycles_ran as u128)
-            + (if cpu.is_jammed() {
+            + (if cpu.lock().unwrap().is_jammed() {
                 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
             } else {
                 0
@@ -152,7 +131,8 @@ fn run_processor(
     // PPU runs at 5.37 MHz
     let check_ppu_time = get_time();
     if check_ppu_time - last_ppu_cycle >= PPU_CYCLES {
-        ppu.tick();
+        let ppu = system.lock().unwrap().ppu.clone();
+        ppu.lock().unwrap().tick();
         last_ppu_cycle = get_time();
     }
 

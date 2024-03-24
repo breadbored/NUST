@@ -1,5 +1,5 @@
-use crate::cartridge::Cartridge;
 use crate::cpu::CPU;
+use crate::system::System;
 use std::sync::Arc;
 use std::sync::Mutex;
 
@@ -8,8 +8,7 @@ pub fn adc(
     instruction: u8,
     operand: u8,
     operand2: u8,
-    rom: Cartridge,
-    ram: &Arc<Mutex<Vec<u8>>>,
+    system: &mut Arc<Mutex<System>>,
 ) -> u64 {
     let mut cycles: u64 = 2;
 
@@ -27,7 +26,7 @@ pub fn adc(
         }
         0x65 => {
             // Zero Page
-            let value = cpu.get_mapped_byte(rom, &ram.clone(), operand as usize);
+            let value = cpu.get_mapped_byte(&mut system.clone(), operand as usize);
             let result = cpu.a as u16 + value as u16 + (cpu.status.carry as u8) as u16;
             cpu.status.carry = result > 0xFF;
             cpu.status.overflow = ((cpu.a ^ value) & 0x80) != 0;
@@ -38,7 +37,7 @@ pub fn adc(
         }
         0x75 => {
             // Zero Page, X
-            let value = cpu.get_mapped_byte(rom, &ram.clone(), operand as usize + cpu.x as usize);
+            let value = cpu.get_mapped_byte(&mut system.clone(), operand as usize + cpu.x as usize);
             let result = cpu.a as u16 + value as u16 + (cpu.status.carry as u8) as u16;
             cpu.status.carry = result > 0xFF;
             cpu.status.overflow = ((cpu.a ^ value) & 0x80) != 0;
@@ -50,8 +49,7 @@ pub fn adc(
         0x6D => {
             // Absolute
             let value = cpu.get_mapped_byte(
-                rom,
-                &ram.clone(),
+                &mut system.clone(),
                 (operand as usize) | ((operand2 as usize) << 8),
             );
             let result = cpu.a as u16 + value as u16 + (cpu.status.carry as u8) as u16;
@@ -65,8 +63,7 @@ pub fn adc(
         0x7D => {
             // Absolute, X
             let value = cpu.get_mapped_byte(
-                rom,
-                &ram.clone(),
+                &mut system.clone(),
                 (operand as usize) | ((operand2 as usize) << 8) + cpu.x as usize,
             );
             let result = cpu.a as u16 + value as u16 + (cpu.status.carry as u8) as u16;
@@ -80,8 +77,7 @@ pub fn adc(
         0x79 => {
             // Absolute, Y
             let value = cpu.get_mapped_byte(
-                rom,
-                &ram.clone(),
+                &mut system.clone(),
                 (operand as usize) | ((operand2 as usize) << 8) + cpu.y as usize,
             );
             let result = cpu.a as u16 + value as u16 + (cpu.status.carry as u8) as u16;
@@ -95,15 +91,12 @@ pub fn adc(
         0x61 => {
             // (Indirect, X)
             let value = cpu.get_mapped_byte(
-                rom.clone(),
-                &ram.clone(),
-                cpu.get_mapped_byte(rom.clone(), &ram.clone(), operand as usize + cpu.x as usize)
+                &mut system.clone(),
+                cpu.get_mapped_byte(&mut system.clone(), operand as usize + cpu.x as usize)
                     as usize
-                    | (cpu.get_mapped_byte(
-                        rom.clone(),
-                        &ram.clone(),
-                        operand as usize + cpu.x as usize + 1,
-                    ) as usize)
+                    | (cpu
+                        .get_mapped_byte(&mut system.clone(), operand as usize + cpu.x as usize + 1)
+                        as usize)
                         << 8,
             );
             let result = cpu.a as u16 + value as u16 + (cpu.status.carry as u8) as u16;
@@ -117,11 +110,9 @@ pub fn adc(
         0x71 => {
             // (Indirect), Y
             let value = cpu.get_mapped_byte(
-                rom.clone(),
-                &ram.clone(),
-                (cpu.get_mapped_byte(rom.clone(), &ram.clone(), operand as usize) as usize
-                    | (cpu.get_mapped_byte(rom.clone(), &ram.clone(), operand as usize + 1)
-                        as usize)
+                &mut system.clone(),
+                (cpu.get_mapped_byte(&mut system.clone(), operand as usize) as usize
+                    | (cpu.get_mapped_byte(&mut system.clone(), operand as usize + 1) as usize)
                         << 8)
                     + cpu.y as usize,
             );

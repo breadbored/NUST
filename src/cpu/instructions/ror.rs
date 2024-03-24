@@ -1,5 +1,6 @@
 use crate::cartridge::Cartridge;
 use crate::cpu::CPU;
+use crate::system::System;
 use std::sync::Arc;
 use std::sync::Mutex;
 
@@ -8,8 +9,7 @@ pub fn ror(
     instruction: u8,
     operand: u8,
     operand2: u8,
-    rom: Cartridge,
-    ram: &Arc<Mutex<Vec<u8>>>,
+    system: &mut Arc<Mutex<System>>,
 ) -> u64 {
     let mut cycles: u64 = 2;
 
@@ -27,7 +27,7 @@ pub fn ror(
         }
         0x66 => {
             // Zero Page
-            let mut ram = ram.lock().unwrap();
+            let mut ram = system.lock().unwrap().ram.lock().unwrap().clone();
             let old_carry = cpu.status.carry;
             let old_val = ram[operand as usize];
             ram[operand as usize] = (ram[operand as usize] >> 1) | ((old_carry as u8) << 7);
@@ -39,7 +39,7 @@ pub fn ror(
         }
         0x76 => {
             // Zero Page, X
-            let mut ram = ram.lock().unwrap();
+            let mut ram = system.lock().unwrap().ram.lock().unwrap().clone();
             let old_carry = cpu.status.carry;
             let old_val = ram[(operand + cpu.x) as usize];
             ram[(operand + cpu.x) as usize] =
@@ -52,7 +52,7 @@ pub fn ror(
         }
         0x6E => {
             // Absolute
-            let mut ram = ram.lock().unwrap();
+            let mut ram = system.lock().unwrap().ram.lock().unwrap().clone();
             let old_carry = cpu.status.carry;
             let addr = operand as u16 | ((operand2 as u16) << 8);
             let old_val = ram[addr as usize];
@@ -65,7 +65,7 @@ pub fn ror(
         }
         0x7E => {
             // Absolute, X
-            let mut ram = ram.lock().unwrap();
+            let mut ram = system.lock().unwrap().ram.lock().unwrap().clone();
             let old_carry = cpu.status.carry;
             let addr = (operand as u16 | ((operand2 as u16) << 8)).wrapping_add(cpu.x as u16);
             let old_val = ram[addr as usize];

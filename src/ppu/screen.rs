@@ -86,7 +86,7 @@ impl Color {
 pub struct Screen {
     pub width: usize,
     pub height: usize,
-    pub pixels: [[Color; 240]; 256],
+    pub pixels: [[Color; 256]; 256],
 }
 
 impl Screen {
@@ -94,12 +94,8 @@ impl Screen {
         Screen {
             width: 256,
             height: 240,
-            pixels: [[Color::new(0, 0, 0); 240]; 256],
+            pixels: [[Color::new(0, 0, 0); 256]; 256],
         }
-    }
-
-    pub fn set_pixel(&mut self, x: usize, y: usize, color: Color) {
-        self.pixels[x][y] = color;
     }
 
     pub fn get_pixel(&self, x: usize, y: usize) -> Color {
@@ -116,14 +112,15 @@ impl Screen {
 
     pub fn get_sprite(&self, chr: Vec<u8>, x: usize, y: usize) -> [[Color; 8]; 8] {
         let mut sprite = [[Color::new(0, 0, 0); 8]; 8];
-        for i in 0..8 {
-            let byte1 = chr[y * 16 + x * 16 + i];
-            let byte2 = chr[y * 16 + x * 16 + i + 8];
-            for j in 0..8 {
-                let bit1 = (byte1 >> (7 - j)) & 1;
-                let bit2 = (byte2 >> (7 - j)) & 1;
+        for col in 0..8 {
+            for row in 0..8 {
+                let tile_offset = y * 32 * 16 + x * 16; // y * # of tiles per row * bytes per tile + x * bytes per tile
+                let byte1 = chr[tile_offset + row];
+                let byte2 = chr[tile_offset + row + 8];
+                let bit1 = (byte1 >> (7 - col)) & 1;
+                let bit2 = (byte2 >> (7 - col)) & 1;
                 let color = (bit2 << 1) | bit1;
-                sprite[i][j] = Color::from_palette(color);
+                sprite[col][row] = Color::from_palette(color); // Corrected the indexing here
             }
         }
         sprite
@@ -131,8 +128,10 @@ impl Screen {
 
     pub fn draw_entire_sprite_map(&mut self, rom: Cartridge, x: usize, y: usize) {
         let chr = rom.chr_rom;
-        for i in 0..16 {
-            for j in 0..16 {
+        let tiles_per_row = 32; // Assuming a 256x256 pixel sprite map, which means 32 tiles per row (256 / 8)
+        let tiles_per_column = chr.len() / 32 / tiles_per_row; // Calculate the number of tiles based on CHR ROM size
+        for i in 0..tiles_per_row {
+            for j in 0..tiles_per_column {
                 let sprite = self.get_sprite(chr.clone(), i, j);
                 self.draw_sprite(x + i * 8, y + j * 8, sprite);
             }

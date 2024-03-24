@@ -1,5 +1,6 @@
 use crate::cartridge::Cartridge;
 use crate::cpu::CPU;
+use crate::system::System;
 use std::sync::Arc;
 use std::sync::Mutex;
 
@@ -8,8 +9,7 @@ pub fn jmp(
     instruction: u8,
     operand: u8,
     operand2: u8,
-    rom: Cartridge,
-    ram: &Arc<Mutex<Vec<u8>>>,
+    system: &mut Arc<Mutex<System>>,
 ) -> u64 {
     let mut cycles: u64 = 2;
 
@@ -23,7 +23,7 @@ pub fn jmp(
         0x6C => {
             // Indirect
             let addr = (operand as usize) | ((operand2 as usize) << 8);
-            cpu.pc = cpu.get_mapped_word(rom, &ram.clone(), addr);
+            cpu.pc = cpu.get_mapped_word(&mut system.clone(), addr);
             cycles = 5;
         }
         _ => {}

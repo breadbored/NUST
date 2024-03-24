@@ -6,13 +6,30 @@ mod screen;
 use crate::cartridge::Cartridge;
 pub use screen::{Color, Screen};
 
+#[derive(Clone, Copy)]
 pub struct PPU {
-    // TODO: Implement PPU
+    ctrl: u8,     // $2000
+    mask: u8,     // $2001
+    status: u8,   // $2002
+    oam_addr: u8, // $2003
+    oam_data: u8, // $2004
+    scroll: u8,   // $2005
+    addr: u8,     // $2006
+    data: u8,     // $2007
 }
 
 impl PPU {
     pub fn new() -> PPU {
-        PPU {}
+        PPU {
+            ctrl: 0,
+            mask: 0,
+            status: 0,
+            oam_addr: 0,
+            oam_data: 0,
+            scroll: 0,
+            addr: 0,
+            data: 0,
+        }
     }
 
     pub fn tick(&self) {}

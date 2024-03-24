@@ -1,5 +1,6 @@
 use crate::cartridge::Cartridge;
 use crate::cpu::CPU;
+use crate::system::System;
 use std::sync::Arc;
 use std::sync::Mutex;
 
@@ -8,8 +9,7 @@ pub fn sbc(
     instruction: u8,
     operand: u8,
     operand2: u8,
-    rom: Cartridge,
-    ram: &Arc<Mutex<Vec<u8>>>,
+    system: &mut Arc<Mutex<System>>,
 ) -> u64 {
     let mut cycles: u64 = 2;
 
@@ -31,7 +31,7 @@ pub fn sbc(
         0xE5 => {
             // Zero Page
             let addr = operand as usize;
-            let value = cpu.get_mapped_byte(rom.clone(), &ram.clone(), addr);
+            let value = cpu.get_mapped_byte(&mut system.clone(), addr);
             let result = (cpu.a as u16)
                 .wrapping_sub(value as u16)
                 .wrapping_sub(1 - cpu.status.carry as u16);
@@ -47,7 +47,7 @@ pub fn sbc(
         0xF5 => {
             // Zero Page, X
             let addr = (operand + cpu.x) as usize;
-            let value = cpu.get_mapped_byte(rom.clone(), &ram.clone(), addr);
+            let value = cpu.get_mapped_byte(&mut system.clone(), addr);
             let result = (cpu.a as u16)
                 .wrapping_sub(value as u16)
                 .wrapping_sub(1 - cpu.status.carry as u16);
@@ -63,7 +63,7 @@ pub fn sbc(
         0xED => {
             // Absolute
             let addr = operand as u16 | ((operand2 as u16) << 8);
-            let value = cpu.get_mapped_byte(rom.clone(), &ram.clone(), addr as usize);
+            let value = cpu.get_mapped_byte(&mut system.clone(), addr as usize);
             let result = (cpu.a as u16)
                 .wrapping_sub(value as u16)
                 .wrapping_sub(1 - cpu.status.carry as u16);
@@ -79,7 +79,7 @@ pub fn sbc(
         0xFD => {
             // Absolute, X
             let addr = (operand as u16 | ((operand2 as u16) << 8)).wrapping_add(cpu.x as u16);
-            let value = cpu.get_mapped_byte(rom.clone(), &ram.clone(), addr as usize);
+            let value = cpu.get_mapped_byte(&mut system.clone(), addr as usize);
             let result = (cpu.a as u16)
                 .wrapping_sub(value as u16)
                 .wrapping_sub(1 - cpu.status.carry as u16);
@@ -95,7 +95,7 @@ pub fn sbc(
         0xF9 => {
             // Absolute, Y
             let addr = (operand as u16 | ((operand2 as u16) << 8)).wrapping_add(cpu.y as u16);
-            let value = cpu.get_mapped_byte(rom.clone(), &ram.clone(), addr as usize);
+            let value = cpu.get_mapped_byte(&mut system.clone(), addr as usize);
             let result = (cpu.a as u16)
                 .wrapping_sub(value as u16)
                 .wrapping_sub(1 - cpu.status.carry as u16);
@@ -111,10 +111,10 @@ pub fn sbc(
         0xE1 => {
             // (Indirect, X)
             let addr = (operand + cpu.x) as usize;
-            let lo = cpu.get_mapped_byte(rom.clone(), &ram.clone(), addr);
-            let hi = cpu.get_mapped_byte(rom.clone(), &ram.clone(), addr + 1);
+            let lo = cpu.get_mapped_byte(&mut system.clone(), addr);
+            let hi = cpu.get_mapped_byte(&mut system.clone(), addr + 1);
             let ptr = lo as u16 | ((hi as u16) << 8);
-            let value = cpu.get_mapped_byte(rom.clone(), &ram.clone(), ptr as usize);
+            let value = cpu.get_mapped_byte(&mut system.clone(), ptr as usize);
             let result = (cpu.a as u16)
                 .wrapping_sub(value as u16)
                 .wrapping_sub(1 - cpu.status.carry as u16);
@@ -130,11 +130,10 @@ pub fn sbc(
         0xF1 => {
             // (Indirect), Y
             let addr = operand as usize;
-            let lo = cpu.get_mapped_byte(rom.clone(), &ram.clone(), addr);
-            let hi = cpu.get_mapped_byte(rom.clone(), &ram.clone(), addr + 1);
+            let lo = cpu.get_mapped_byte(&mut system.clone(), addr);
+            let hi = cpu.get_mapped_byte(&mut system.clone(), addr + 1);
             let ptr = lo as u16 | ((hi as u16) << 8);
-            let value =
-                cpu.get_mapped_byte(rom.clone(), &ram.clone(), ptr as usize + cpu.y as usize);
+            let value = cpu.get_mapped_byte(&mut system.clone(), ptr as usize + cpu.y as usize);
             let result = (cpu.a as u16)
                 .wrapping_sub(value as u16)
                 .wrapping_sub(1 - cpu.status.carry as u16);

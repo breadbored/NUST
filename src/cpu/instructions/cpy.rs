@@ -1,5 +1,6 @@
 use crate::cartridge::Cartridge;
 use crate::cpu::CPU;
+use crate::system::System;
 use std::sync::Arc;
 use std::sync::Mutex;
 
@@ -8,8 +9,7 @@ pub fn cpy(
     instruction: u8,
     operand: u8,
     operand2: u8,
-    rom: Cartridge,
-    ram: &Arc<Mutex<Vec<u8>>>,
+    system: &mut Arc<Mutex<System>>,
 ) -> u64 {
     let mut cycles: u64 = 2;
 
@@ -27,7 +27,7 @@ pub fn cpy(
             // Zero Page
             let addr = operand as usize;
             let value = cpu
-                .get_mapped_byte(rom.clone(), &ram.clone(), addr)
+                .get_mapped_byte(&mut system.clone(), addr)
                 .wrapping_sub(1);
             cpu.status.carry = cpu.y >= value;
             cpu.status.zero = value == 0;

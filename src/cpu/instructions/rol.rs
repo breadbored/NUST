@@ -1,5 +1,6 @@
 use crate::cartridge::Cartridge;
 use crate::cpu::CPU;
+use crate::system::System;
 use std::sync::Arc;
 use std::sync::Mutex;
 
@@ -8,14 +9,14 @@ pub fn rol(
     instruction: u8,
     operand: u8,
     operand2: u8,
-    rom: Cartridge,
-    ram: &Arc<Mutex<Vec<u8>>>,
+    system: &mut Arc<Mutex<System>>,
 ) -> u64 {
     let mut cycles: u64 = 2;
 
     match instruction {
         0x2A => {
             // Accumulator
+            let ram = system.lock().unwrap().ram.clone();
             let carry = cpu.status.carry as u8;
             let new_carry = (cpu.a & 0x80) >> 7;
             cpu.a = (cpu.a << 1) | carry;
@@ -27,6 +28,7 @@ pub fn rol(
         }
         0x26 => {
             // Zero Page
+            let ram = system.lock().unwrap().ram.clone();
             let carry = cpu.status.carry as u8;
             let addr: u16 = operand as u16;
             let value = ram.lock().unwrap()[addr as usize];
@@ -41,6 +43,7 @@ pub fn rol(
         }
         0x36 => {
             // Zero Page, X
+            let ram = system.lock().unwrap().ram.clone();
             let carry = cpu.status.carry as u8;
             let addr: u16 = (operand + cpu.x) as u16;
             let value = ram.lock().unwrap()[addr as usize];
@@ -55,6 +58,7 @@ pub fn rol(
         }
         0x2E => {
             // Absolute
+            let ram = system.lock().unwrap().ram.clone();
             let carry = cpu.status.carry as u8;
             let addr: u16 = operand as u16 | ((operand2 as u16) << 8);
             let value = ram.lock().unwrap()[addr as usize];
@@ -69,6 +73,7 @@ pub fn rol(
         }
         0x3E => {
             // Absolute, X
+            let ram = system.lock().unwrap().ram.clone();
             let carry = cpu.status.carry as u8;
             let addr: u16 = (operand as u16 | ((operand2 as u16) << 8)).wrapping_add(cpu.x as u16);
             let value = ram.lock().unwrap()[addr as usize];

@@ -1,5 +1,6 @@
 use crate::cartridge::Cartridge;
 use crate::cpu::CPU;
+use crate::system::System;
 use std::sync::{Arc, Mutex};
 
 pub fn lsr(
@@ -7,8 +8,7 @@ pub fn lsr(
     instruction: u8,
     operand: u8,
     operand2: u8,
-    rom: Cartridge,
-    ram: &Arc<Mutex<Vec<u8>>>,
+    system: &mut Arc<Mutex<System>>,
 ) -> u64 {
     let mut cycles: u64 = 2;
 
@@ -25,7 +25,7 @@ pub fn lsr(
         0x46 => {
             // Zero Page
             let addr = operand as usize;
-            let value = cpu.get_mapped_byte(rom.clone(), &ram.clone(), addr);
+            let value = cpu.get_mapped_byte(&mut system.clone(), addr);
             cpu.status.carry = value & 0x01 != 0;
             let value = value >> 1;
             cpu.status.zero = value == 0;
@@ -36,7 +36,7 @@ pub fn lsr(
         0x56 => {
             // Zero Page, X
             let addr = (operand + cpu.x) as usize;
-            let value = cpu.get_mapped_byte(rom.clone(), &ram.clone(), addr);
+            let value = cpu.get_mapped_byte(&mut system.clone(), addr);
             cpu.status.carry = value & 0x01 != 0;
             let value = value >> 1;
             cpu.status.zero = value == 0;
@@ -47,7 +47,7 @@ pub fn lsr(
         0x4E => {
             // Absolute
             let addr = operand as u16 | ((operand2 as u16) << 8);
-            let value = cpu.get_mapped_byte(rom.clone(), &ram.clone(), addr as usize);
+            let value = cpu.get_mapped_byte(&mut system.clone(), addr as usize);
             cpu.status.carry = value & 0x01 != 0;
             let value = value >> 1;
             cpu.status.zero = value == 0;
@@ -58,7 +58,7 @@ pub fn lsr(
         0x5E => {
             // Absolute, X
             let addr = (operand as u16 | ((operand2 as u16) << 8)).wrapping_add(cpu.x as u16);
-            let value = cpu.get_mapped_byte(rom.clone(), &ram.clone(), addr as usize);
+            let value = cpu.get_mapped_byte(&mut system.clone(), addr as usize);
             cpu.status.carry = value & 0x01 != 0;
             let value = value >> 1;
             cpu.status.zero = value == 0;

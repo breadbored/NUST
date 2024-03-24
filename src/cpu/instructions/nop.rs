@@ -1,4 +1,5 @@
 use crate::cpu::CPU;
+use crate::system::System;
 
 pub fn nop(cpu: &mut CPU, instruction: u8) -> u64 {
     // println!("NOP");
