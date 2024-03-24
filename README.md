@@ -1,6 +1,6 @@
-# NUST
+# CARESemu: Cycle Accurate Rust Entertainment System Emulator
 
-[WIP] A cycle accurate NES emulator in Rust, with minimal dependencies
+A [WIP] cycle accurate Nintendo Entertainment System (NES) emulator in Rust, with minimal dependencies
 
 [!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/breadcodes)
 

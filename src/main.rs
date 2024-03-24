@@ -1,17 +1,19 @@
 mod cartridge;
 mod cpu;
+mod ppu;
 
 use cartridge::{get_rom, Cartridge};
 use rand::distributions::uniform::SampleBorrow;
 use sdl2::event::Event;
-use sdl2::pixels::Color;
 use sdl2::rect::Point;
 use std::{
     sync::{Arc, Mutex},
     time::{Duration, SystemTime},
 };
 
-use crate::cpu::CPU;
+use crate::ppu::PPU;
+use crate::{cpu::CPU, ppu::Color as NesColor, ppu::Screen};
+use sdl2::pixels::Color;
 
 fn main() {
     // System
@@ -28,6 +30,7 @@ fn main() {
 
     // // Emulator
     let mut cpu: CPU = CPU::new();
+    let mut ppu: PPU = PPU::new();
     let mut rom: Cartridge = get_rom();
     let ram: Arc<Mutex<Vec<u8>>> = Arc::new(Mutex::new(vec![0; 0x800]));
     let vram: Arc<Mutex<Vec<u8>>> = Arc::new(Mutex::new(vec![0; 0x800]));
@@ -59,6 +62,7 @@ fn main() {
             last_ppu_cycle,
             last_apu_cycle,
             &mut cpu,
+            &mut ppu,
             &mut rom,
             ram.clone(),
             vram.clone(),
@@ -82,6 +86,25 @@ fn main() {
                 )
                 .unwrap();
 
+            let screen: Screen = ppu.get_screen(rom.clone());
+
+            // Draw the screen
+            for y in 0..240 {
+                for x in 0..256 {
+                    let color_nes = screen.get_pixel(x, y);
+                    let color = Color::RGB(color_nes.r, color_nes.g, color_nes.b);
+                    canvas.set_draw_color(color);
+                    canvas
+                        .fill_rect(sdl2::rect::Rect::new(
+                            x as i32 * SCALE as i32,
+                            y as i32 * SCALE as i32,
+                            SCALE as u32,
+                            SCALE as u32,
+                        ))
+                        .unwrap();
+                }
+            }
+
             canvas.present();
             last_draw_time = get_time();
         }
@@ -102,6 +125,7 @@ fn run_processor(
     mut last_ppu_cycle: u128,
     mut last_apu_cycle: u128,
     cpu: &mut CPU,
+    ppu: &mut PPU,
     rom: &mut Cartridge,
     ram: Arc<Mutex<Vec<u8>>>,
     vram: Arc<Mutex<Vec<u8>>>,
@@ -128,7 +152,7 @@ fn run_processor(
     // PPU runs at 5.37 MHz
     let check_ppu_time = get_time();
     if check_ppu_time - last_ppu_cycle >= PPU_CYCLES {
-        // PPU.tick(&vram);
+        ppu.tick();
         last_ppu_cycle = get_time();
     }
 
