@@ -10,6 +10,7 @@ pub struct System {
     pub rom: Cartridge,
     pub ram: Arc<Mutex<Vec<u8>>>,
     pub vram: Arc<Mutex<Vec<u8>>>,
+    pub oam: Arc<Mutex<Vec<u8>>>,
 }
 
 impl System {
@@ -18,9 +19,10 @@ impl System {
             cpu: Arc::new(Mutex::new(CPU::new())),
             ppu: Arc::new(Mutex::new(PPU::new())),
             // apu: Arc::new(Mutex::new(APU::new())),
-            rom: rom,
+            rom,
             ram: Arc::new(Mutex::new(vec![0; 0x800])),
             vram: Arc::new(Mutex::new(vec![0; 0x800])),
+            oam: Arc::new(Mutex::new(vec![0; 0x100])),
         }
     }
 }

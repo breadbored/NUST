@@ -429,15 +429,42 @@ impl CPU {
         }
 
         if address <= 0x3FFF {
-            // println!("TODO: PPU REGISTERS");
-            if address == 0x2002 {
+            let addr = 0x2000 | (address & 0x7);
+            // println!("Getting byte from PPU");
+            let ppu = system.lock().unwrap().ppu.clone();
+            if addr == 0x2000 {
+                // println!("TODO: PPU CTRL");
+                return ppu.lock().unwrap().ctrl;
+            }
+            if addr == 0x2001 {
+                // println!("TODO: PPU MASK");
+                return ppu.lock().unwrap().mask;
+            }
+            if addr == 0x2002 {
                 // println!("TODO: PPU STATUS");
-                return 0;
+                return ppu.lock().unwrap().status;
             }
-            if address == 0x2007 {
+            if addr == 0x2003 {
+                // println!("TODO: PPU OAM ADDR");
+                return ppu.lock().unwrap().oam_addr;
+            }
+            if addr == 0x2004 {
+                // println!("TODO: PPU OAM DATA");
+                return ppu.lock().unwrap().oam_data;
+            }
+            if addr == 0x2005 {
+                // println!("TODO: PPU SCROLL");
+                return ppu.lock().unwrap().scroll;
+            }
+            if addr == 0x2006 {
+                // println!("TODO: PPU ADDR");
+                return ppu.lock().unwrap().addr;
+            }
+            if addr == 0x2007 {
                 // println!("TODO: PPU DATA");
-                return 0;
+                return ppu.lock().unwrap().data;
             }
+
             return 0;
         }
 
@@ -481,53 +508,62 @@ impl CPU {
                 .get_prg_from_address(address as u16);
         }
 
-        println!("WHAT THE FUCK?");
+        println!("WHAT? How did we get here?");
 
         return 0;
     }
 
     pub fn set_mapped_byte(&self, system: &mut Arc<Mutex<System>>, address: usize, value: u8) {
         if address <= 0x1FFF {
-            let mut ram = system.lock().unwrap().ram.clone();
+            let ram = system.lock().unwrap().ram.clone();
             ram.lock().unwrap()[address & 0x7FF] = value;
             return;
         }
 
         if address <= 0x3FFF {
-            // println!("TODO: PPU REGISTERS");
-            if address == 0x2000 {
+            // println!("Setting byte in PPU");
+            let addr = 0x2000 | (address & 0x7);
+            let ppu = system.lock().unwrap().ppu.clone();
+            if addr == 0x2000 {
                 // println!("TODO: PPU CTRL");
+                ppu.lock().unwrap().ctrl = value;
                 return;
             }
-            if address == 0x2001 {
+            if addr == 0x2001 {
                 // println!("TODO: PPU MASK");
+                ppu.lock().unwrap().mask = value;
                 return;
             }
-            if address == 0x2003 {
+            if addr == 0x2002 {
+                // println!("TODO: PPU STATUS");
+                ppu.lock().unwrap().status = value;
+                return;
+            }
+            if addr == 0x2003 {
                 // println!("TODO: PPU OAM ADDR");
+                ppu.lock().unwrap().oam_addr = value;
                 return;
             }
-            if address == 0x2004 {
+            if addr == 0x2004 {
                 // println!("TODO: PPU OAM DATA");
+                ppu.lock().unwrap().oam_data = value;
                 return;
             }
-            if address == 0x2005 {
+            if addr == 0x2005 {
                 // println!("TODO: PPU SCROLL");
+                ppu.lock().unwrap().scroll = value;
                 return;
             }
-            if address == 0x2006 {
+            if addr == 0x2006 {
                 // println!("TODO: PPU ADDR");
+                ppu.lock().unwrap().addr = value;
                 return;
             }
-            if address == 0x2007 {
+            if addr == 0x2007 {
                 // println!("TODO: PPU DATA");
+                ppu.lock().unwrap().data = value;
                 return;
             }
-            if address == 0x2008 {
-                // println!("TODO: PPU OAM DMA");
-                return;
-            }
-            return;
         }
 
         if address <= 0x401F {

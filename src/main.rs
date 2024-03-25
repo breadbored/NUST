@@ -2,6 +2,7 @@ mod cartridge;
 mod cpu;
 mod ppu;
 mod system;
+extern crate tiny_http;
 
 use rand::distributions::uniform::SampleBorrow;
 use sdl2::event::Event;
@@ -9,6 +10,7 @@ use std::{
     sync::{Arc, Mutex},
     time::SystemTime,
 };
+use tiny_http::{Response, Server};
 
 use crate::ppu::PPU;
 use crate::{cpu::CPU, ppu::Screen};
@@ -36,8 +38,29 @@ fn main() {
     let mut last_cpu_cycle: u128 = get_time();
     let mut last_ppu_cycle: u128 = get_time();
     let mut last_apu_cycle: u128 = get_time();
-
+    let mut num_ppu_cycles: u64 = 0;
     let mut last_draw_time: u128 = get_time();
+
+    // Create a non-blocking tiny_http server.
+    let server = Arc::new(Server::http("0.0.0.0:8080").unwrap());
+    let server_handle = Arc::clone(&server);
+    // Run the server in a non-blocking way by spawning a new thread.
+    let debugger_system = system.clone();
+    std::thread::spawn(move || {
+        for request in server_handle.incoming_requests() {
+            let response = Response::from_data(
+                debugger_system
+                    .clone()
+                    .lock()
+                    .unwrap()
+                    .ram
+                    .lock()
+                    .unwrap()
+                    .to_vec(),
+            );
+            let _ = request.respond(response);
+        }
+    });
 
     // System Event Loop
     'running: loop {
@@ -57,10 +80,16 @@ fn main() {
             }
         }
 
-        (last_cpu_cycle, last_ppu_cycle, last_apu_cycle) = run_processor(
+        (
             last_cpu_cycle,
             last_ppu_cycle,
             last_apu_cycle,
+            num_ppu_cycles,
+        ) = run_processor(
+            last_cpu_cycle,
+            last_ppu_cycle,
+            last_apu_cycle,
+            num_ppu_cycles,
             &mut system.clone(),
         );
 
@@ -106,8 +135,9 @@ fn run_processor(
     mut last_cpu_cycle: u128,
     mut last_ppu_cycle: u128,
     mut last_apu_cycle: u128,
+    mut num_ppu_cycles: u64,
     system: &mut Arc<Mutex<System>>,
-) -> (u128, u128, u128) {
+) -> (u128, u128, u128, u64) {
     // println!("Running processor");
     const CPU_CYCLES: u128 = 559; // 1.79 MHz
     const PPU_CYCLES: u128 = 186; // 5.37 MHz
@@ -132,7 +162,10 @@ fn run_processor(
     let check_ppu_time = get_time();
     if check_ppu_time - last_ppu_cycle >= PPU_CYCLES {
         let ppu = system.lock().unwrap().ppu.clone();
-        ppu.lock().unwrap().tick();
+        num_ppu_cycles = ppu
+            .lock()
+            .unwrap()
+            .tick(&mut system.clone(), &mut num_ppu_cycles);
         last_ppu_cycle = get_time();
     }
 
@@ -143,5 +176,10 @@ fn run_processor(
         last_apu_cycle = get_time();
     }
 
-    return (last_cpu_cycle, last_ppu_cycle, last_apu_cycle);
+    return (
+        last_cpu_cycle,
+        last_ppu_cycle,
+        last_apu_cycle,
+        num_ppu_cycles,
+    );
 }
